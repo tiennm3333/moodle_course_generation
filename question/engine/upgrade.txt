@@ -1,0 +1,25 @@
+This files describes API changes for the core question system.
+
+=== 3.0, 2.9.2, 2.8.8 ===
+
+1) The extra internal PARAM constant question_attempt::PARAM_MARK should no
+   longer be used. (It should not have been used outside the core of the
+   question system). See MDL-51090 if you want more explanation.
+
+
+=== 2.6 ===
+
+1) The method question_behaviour::is_manual_grade_in_range and move and become
+question_engine::is_manual_grade_in_range.
+
+2) The arguments to core_question_renderer::mark_summary changed from
+($qa, $options) to ($qa, $behaviouroutput, $options). If you have overridden
+that method you will need to update your code.
+
+3) Heading level for number(), add_part_heading() and respond_history()
+has been lowered by one level. These changes are part of improving the page
+accessibility and making heading to have proper nesting. (MDL-41615)
+
+=== Earlier changes ===
+
+* Were not documented in this way. Sorry.
