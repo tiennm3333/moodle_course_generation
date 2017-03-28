@@ -27,6 +27,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2017032700;
-$plugin->requires  = 2017032500;
+$plugin->requires  = 2014051200;
 $plugin->component = 'local_courseportfolio';
 
