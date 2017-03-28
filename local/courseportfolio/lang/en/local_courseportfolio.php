@@ -26,3 +26,7 @@
 
 $string['courseportfolio'] = 'Class support import';
 $string['setting'] = 'Setting';
+
+$string['uploadbutton'] = 'Upload';
+
+
