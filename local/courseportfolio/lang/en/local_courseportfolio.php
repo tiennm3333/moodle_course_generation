@@ -27,6 +27,14 @@
 $string['courseportfolio'] = 'Class support import';
 $string['setting'] = 'Setting';
 
+$string['title/courses'] = 'Import Courses/Folders';
+$string['title/files'] = 'Import Files';
+$string['title/common_files'] = 'Import Files Common';
+
+$string['coursefolders_help'] = '';
+$string['coursefoldercommonfiles_help'] = '';
+$string['coursefolderfiles_help'] = '';
+
 $string['uploadbutton'] = 'Upload';
 
 

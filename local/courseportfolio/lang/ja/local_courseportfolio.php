@@ -26,3 +26,13 @@
 
 $string['courseportfolio'] = '授業支援インポート';
 $string['setting'] = '設定';
+
+$string['title/courses'] = 'Import Courses/Folders';
+$string['title/files'] = 'Import Files';
+$string['title/common_files'] = 'Import Files Common';
+
+$string['coursefolders_help'] = '';
+$string['coursefoldercommonfiles_help'] = '';
+$string['coursefolderfiles_help'] = '';
+
+$string['uploadbutton'] = 'Upload';

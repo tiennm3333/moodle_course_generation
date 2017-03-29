@@ -26,7 +26,7 @@
 
 require_once($CFG->libdir . '/formslib.php');
 
-class course_form extends moodleform {
+class file_common_form extends moodleform {
 
     protected function definition() {
         $mform = $this->_form;
@@ -34,15 +34,15 @@ class course_form extends moodleform {
         $mform->addElement('html', '<div class="block"><div class="content">');
         $mform->addElement('html', '<div class="header">');
         $mform->addElement('html', '<h2>');
-        $mform->addElement('html', get_string('title/courses', 'local_courseportfolio'));
+        $mform->addElement('html', get_string('title/common_files', 'local_courseportfolio'));
         $mform->addElement('html', '</h2>');
         $mform->addElement('html', '</div>');
 
-        $mform->addElement('filemanager', 'coursefolders', get_string('introattachments', 'assign'), null, array('subdirs' => 0, 'accepted_types' => '*'));
-        $mform->addHelpButton('coursefolders', 'coursefolders', 'local_courseportfolio');
+        $mform->addElement('filemanager', 'coursefoldercommonfiles', get_string('introattachments', 'assign'), null, array('subdirs' => 0, 'accepted_types' => '*'));
+        $mform->addHelpButton('coursefoldercommonfiles', 'coursefoldercommonfiles', 'local_courseportfolio');
 
         $buttonarray = array();
-        $buttonarray[] = &$mform->createElement('submit', 'submitcoursefolders', get_string("uploadbutton", "local_courseportfolio"), array('class' => 'form-submit'));
+        $buttonarray[] = &$mform->createElement('submit', 'submitcommonfiles', get_string("uploadbutton", "local_courseportfolio"), array('class' => 'form-submit'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
 
