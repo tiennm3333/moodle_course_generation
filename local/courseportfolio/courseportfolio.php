@@ -29,7 +29,6 @@ require_once($CFG->dirroot . '/local/courseportfolio/form/course_form.php');
 require_once($CFG->dirroot . '/local/courseportfolio/form/file_form.php');
 require_once($CFG->dirroot . '/local/courseportfolio/form/file_common_form.php');
 
-global $PAGE;
 require_login();
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/local/courseportfolio/courseportfolio.php');
