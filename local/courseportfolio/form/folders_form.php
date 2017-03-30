@@ -26,7 +26,7 @@
 
 require_once($CFG->libdir . '/formslib.php');
 
-class course_form extends moodleform {
+class folders_form extends moodleform {
 
     protected function definition() {
         $mform = $this->_form;
@@ -38,8 +38,8 @@ class course_form extends moodleform {
         $mform->addElement('html', '</h2>');
         $mform->addElement('html', '</div>');
 
-        $mform->addElement('filemanager', 'coursefolders', get_string('introattachments', 'assign'), null, array('subdirs' => 0, 'accepted_types' => '*'));
-        $mform->addHelpButton('coursefolders', 'coursefolders', 'local_courseportfolio');
+        $mform->addElement('filemanager', 'folders', get_string('introattachments', 'assign'), null, array('subdirs' => 0, 'accepted_types' => '*'));
+        $mform->addHelpButton('folders', 'folders', 'local_courseportfolio');
 
         $buttonarray = array();
         $buttonarray[] = &$mform->createElement('submit', 'submitcoursefolders', get_string("uploadbutton", "local_courseportfolio"), array('class' => 'form-submit'));

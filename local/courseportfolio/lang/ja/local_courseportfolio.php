@@ -31,11 +31,11 @@ $string['title/courses'] = 'Import Courses/Folders';
 $string['title/files'] = 'Import Files';
 $string['title/common_files'] = 'Import Files Common';
 
-$string['coursefolders'] = '';
-$string['coursefolders_help'] = '';
-$string['coursefoldercommonfiles'] = '';
-$string['coursefoldercommonfiles_help'] = '';
-$string['coursefolderfiles'] = '';
-$string['coursefolderfiles_help'] = '';
+$string['folders'] = '';
+$string['folders_help'] = '';
+$string['folderfiles'] = '';
+$string['folderfiles_help'] = '';
+$string['topicfiles'] = '';
+$string['topicfiles_help'] = '';
 
 $string['uploadbutton'] = 'Upload';

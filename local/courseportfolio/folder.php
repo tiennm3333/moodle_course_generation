@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'courseportfolio', language 'en', branch 'MOODLE_28_STABLE'
+ * Course Portfolio
  *
  * @package    local
  * @subpackage courseportfolio
@@ -24,20 +24,15 @@
  * @copyright  2017 (C) VERSION2, INC.
  */
 
-$string['courseportfolio'] = 'Class support import';
-$string['setting'] = 'Setting';
+require_once(__DIR__ . "/../../config.php");
+require_once($CFG->dirroot . '/local/courseportfolio/form/folders_form.php');
 
-$string['title/courses'] = 'Import Courses/Folders';
-$string['title/files'] = 'Import Files';
-$string['title/common_files'] = 'Import Files Common';
+$folders = new folders_form();
 
-$string['folders'] = '';
-$string['folders_help'] = '';
-$string['folderfiles'] = '';
-$string['folderfiles_help'] = '';
-$string['topicfiles'] = '';
-$string['topicfiles_help'] = '';
+if ($foldersdata = $folders->get_data()) {
+    $draftitemid = file_get_submitted_draft_itemid('folders');
+    var_dump($draftitemid);
+    die('folders');
+}
 
-$string['uploadbutton'] = 'Upload';
-
-
+$folders->display();
