@@ -121,3 +121,69 @@ function courseportfolio_check_folder($course, $section) {
 
     return add_moduleinfo($data, $course, $mform);
 }
+
+function courseportfolio_check_csv_import($draftitemid, $importtype) {
+    $draftitemid = file_get_submitted_draft_itemid('coursefolderfiles');
+    $importtype = 'coursefolderfiles';
+
+//    $context = context_course::instance(2);
+//    $context = context_module::instance(16);
+//    require_capability('moodle/course:manageactivities', $context);
+//    echo '<pre>';
+//    var_dump($draftitemid);
+//    $draftitemid = 599571289;
+    $fs = get_file_storage();
+//    $files = $fs->get_area_files(5, 'mod_folder', 'intro', $draftitemid);
+    $files = $fs->get_area_files(5, 'user', 'draft', $draftitemid, 'id ASC', false);
+//    echo '<pre>';
+//    var_dump($files);die;
+
+    $i = 0;
+    foreach ($files as $file) {
+        if (!$i) {
+            if (pathinfo($file->get_filename(), PATHINFO_EXTENSION) != 'csv') {
+                var_dump('sai kieu file');die;
+            }
+            if ($csvdata = $file->get_content()) {
+                $iid = csv_import_reader::get_new_iid($importtype);
+                $cir = new csv_import_reader($iid, $importtype);
+                $readcount = $cir->load_csv_content($csvdata, 'shift_jis', 'comma');
+
+                $csvloaderror = $cir->get_error();
+                if (!is_null($csvloaderror)) {
+                    $returnurl = new moodle_url('/admin/tool/uploaduser/index.php');
+                    print_error('csvloaderror', '', $returnurl, $csvloaderror);
+                }
+//                $filecolumns = uu_validate_user_upload_columns($cir, $STD_FIELDS, $PRF_FIELDS, $returnurl);
+
+                // init csv import helper
+                $cir->init();
+                $linenum = 1; //column header is first line
+
+
+                while ($line = $cir->next()) {
+                    $linenum++;
+//                    $user = new stdClass();
+
+                    // add fields to user object
+                    foreach ($line as $keynum => $value) {
+                        echo '<pre>';
+                        var_dump($line);die;
+
+                    }
+                }
+
+
+
+                $cir->close();
+                $cir->cleanup(true);
+
+
+                echo '<pre>';
+                var_dump($content);
+
+            }
+        }
+        $i++;
+    }
+}

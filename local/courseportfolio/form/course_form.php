@@ -28,8 +28,9 @@ require_once($CFG->libdir . '/formslib.php');
 
 class course_form extends moodleform {
 
-    protected function definition() {
+    function definition() {
         $mform = $this->_form;
+//        $mform =& $this->_form;
 
         $mform->addElement('html', '<div class="block"><div class="content">');
         $mform->addElement('html', '<div class="header">');
@@ -38,11 +39,33 @@ class course_form extends moodleform {
         $mform->addElement('html', '</h2>');
         $mform->addElement('html', '</div>');
 
-        $mform->addElement('filemanager', 'coursefolders', get_string('introattachments', 'assign'), null, array('subdirs' => 0, 'accepted_types' => '*'));
+//        $fileoptions = array('subdirs'=>0,
+//            'maxbytes'=>$COURSE->maxbytes,
+//            'accepted_types'=>'csv',
+//            'maxfiles'=>100,
+//            'return_types'=>FILE_INTERNAL);
+
+        //Using filemanager as filepicker
+//        $mform->addElement('filepicker', 'questionfile', get_string('upload'));
+//        $mform->addRule('questionfile', null, 'required', null, 'client');
+
+//        $mform->addElement('filepicker', 'coursefolders', get_string('introattachments', 'assign'), null, array('subdirs' => 0, 'accepted_types' => '*', 'maxfiles'=>20), 'client');
+
+        $fileoptions = array('subdirs'=>0,
+            'maxbytes'=>5000000,
+            'accepted_types'=>'*',
+            'maxfiles'=>5,
+//            'return_types'=>FILE_INTERNAL
+        );
+
+        $mform->addElement('filepicker', 'coursefolders', get_string('introattachments', 'assign'), null, $fileoptions);
+
+
+
         $mform->addHelpButton('coursefolders', 'coursefolders', 'local_courseportfolio');
 
         $buttonarray = array();
-        $buttonarray[] = &$mform->createElement('submit', 'submitcoursefolders', get_string("uploadbutton", "local_courseportfolio"), array('class' => 'form-submit'));
+        $buttonarray[] = &$mform->createElement('submit', 'coursefolderscoursefolders', get_string("uploadbutton", "local_courseportfolio"), array('class' => 'form-submit'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
 
