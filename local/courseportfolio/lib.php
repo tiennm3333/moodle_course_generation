@@ -65,7 +65,7 @@ function courseportfolio_check_category($categoryname) {
     global $DB;
     $category = $DB->get_record('course_categories', array('name' => $categoryname), 'id');
 
-    if ($category->id) {
+    if ($category) {
         return $category->id;
     }
 
@@ -73,7 +73,7 @@ function courseportfolio_check_category($categoryname) {
     $data->name = $categoryname;
     $category = coursecat::create($data);
 
-    return $category ? $category->id : false;
+    return isset($category->id) ? $category->id : false;
 }
 
 /**
@@ -101,15 +101,15 @@ function courseportfolio_check_course($categoryid, $shortname) {
     // Apply course default settings
     $courseconfig = get_config('moodlecourse');
     $data->format = COURSE_FOMAT_TOPICS;
-    $data->newsitems = $courseconfig->newsitems;
-    $data->showgrades = $courseconfig->showgrades;
-    $data->showreports = $courseconfig->showreports;
-    $data->maxbytes = $courseconfig->maxbytes;
-    $data->groupmode = $courseconfig->groupmode;
-    $data->groupmodeforce = $courseconfig->groupmodeforce;
-    $data->visible = $courseconfig->visible;
+    $data->newsitems = isset($courseconfig->newsitems) ? $courseconfig->newsitems : 1;
+    $data->showgrades = isset($courseconfig->showgrades) ? $courseconfig->showgrades : 1;
+    $data->showreports = isset($courseconfig->showreports) ? $courseconfig->showreports : 0;
+    $data->maxbytes = isset($courseconfig->maxbytes) ? $courseconfig->maxbytes : 0;
+    $data->groupmode = isset($courseconfig->groupmode) ? $courseconfig->groupmode : 0;
+    $data->groupmodeforce = isset($courseconfig->groupmodeforce) ? $courseconfig->groupmodeforce : 0;
+    $data->visible = isset($courseconfig->visible) ? $courseconfig->visible : 1;
     $data->visibleold = $data->visible;
-    $data->lang = $courseconfig->lang;
+    $data->lang = isset($courseconfig->lang) ? $courseconfig->lang : '';
     $course = create_course($data);
 
     return $course ? $course : false;
@@ -136,7 +136,9 @@ function courseportfolio_check_folder($foldername, $folderdescription, $course, 
     }
 
     $cw = get_fast_modinfo($course)->get_section_info($section);
-    $module = $DB->get_record('modules', array('name' => COURSE_MODULE_FOLDER), 'id');
+    if (!$module = $DB->get_record('modules', array('name' => COURSE_MODULE_FOLDER), 'id')) {
+        return false;
+    }
 
     $cm = null;
     $data = new stdClass();
@@ -204,9 +206,7 @@ function courseportfolio_create_folder($categoryname, $coursename, $topicnumber,
  */
 function courseportfolio_get_contextid_by_draftitemid($draftitemid) {
     global $DB;
-    if ($contextid = $DB->get_records_select('files', 'itemid = :itemid', array('itemid' => $draftitemid), '', 'contextid', 1, 1)) {
-        return key($contextid);
-    }
+    $contextid = $DB->get_records_select('files', 'itemid = :itemid', array('itemid' => $draftitemid), '', 'contextid', 1, 1);
 
-    return false;
+    return is_array($contextid) ? key($contextid) : false;
 }

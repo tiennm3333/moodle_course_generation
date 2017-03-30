@@ -26,6 +26,7 @@
 
 require_once(__DIR__ . "/../../config.php");
 require_once($CFG->dirroot . '/local/courseportfolio/form/topic_files_form.php');
+require_login();
 
 $topicfiles = new topic_files_form();
 
