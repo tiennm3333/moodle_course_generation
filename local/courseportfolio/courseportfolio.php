@@ -25,6 +25,7 @@
  */
 
 require_once(__DIR__ . "/../../config.php");
+require_once($CFG->libdir . '/csvlib.class.php');
 
 require_login();
 $PAGE->set_context(context_system::instance());

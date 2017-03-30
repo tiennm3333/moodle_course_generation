@@ -31,8 +31,65 @@ $folders = new folders_form();
 
 if ($foldersdata = $folders->get_data()) {
     $draftitemid = file_get_submitted_draft_itemid('folders');
-    var_dump($draftitemid);
-    die('folders');
+    $contextid = courseportfolio_get_contextid_by_draftitemid($draftitemid);
+    $fs = get_file_storage();
+    $files = $fs->get_area_files($contextid, 'user', 'draft', $draftitemid, 'id ASC', false);
+    $i = 0;
+    foreach ($files as $file) {
+        if (!$i) {
+            if (pathinfo($file->get_filename(), PATHINFO_EXTENSION) != 'csv') {
+                print_error('the first file import must have csv extension');
+                break;
+            }
+            if ($csvdata = $file->get_content()) {
+                if (!$encoding = mb_detect_encoding($csvdata, 'UTF-8, JIS, SJIS, EUC-JP')) {
+                    print_error('csv file type not support encoding');
+                    break;
+                }
+
+                $iid = csv_import_reader::get_new_iid('coursefolderfiles');
+                $cir = new csv_import_reader($iid, 'coursefolderfiles');
+                $csvtotalline = $cir->load_csv_content($csvdata, $encoding, 'comma');
+
+                $csvloaderror = $cir->get_error();
+                if (!is_null($csvloaderror)) {
+                    print_error('csv file error');
+                    break;
+                }
+
+                $cir->init();
+                $linenum = 1; //column header is first line
+                $countsucess = 0;
+                while ($line = $cir->next()) {
+                    $linenum++;
+                    /*
+                        $categoryname = $line[0];
+                        $coursename = $line[1];
+                        $topicnumber = $line[2];
+                        $foldername = $line[3];
+                        $folderdescription = $line[4];
+                    */
+                    if (empty($line[0]) || empty($line[1]) || empty($line[2]) || empty($line[3]) || empty($line[4])) {
+
+                    } else {
+                        $folder = courseportfolio_create_folder($line[0], $line[1], $line[2], $line[3], $line[4]);
+                        if ($folder && is_object($folder)) {
+                            $countsucess++;
+                        }
+                    }
+                }
+                $cir->close();
+                $cir->cleanup(true);
+            }
+        }
+        $i++;
+    }
+
+    if ($countsucess) {
+        echo  'import folder success';
+    } else {
+        echo  'import folder false or folder exits';
+    }
 }
 
 $folders->display();
