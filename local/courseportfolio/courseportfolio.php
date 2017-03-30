@@ -25,10 +25,6 @@
  */
 
 require_once(__DIR__ . "/../../config.php");
-//require_once($CFG->dirroot . '/local/courseportfolio/form/course_form.php');
-//require_once($CFG->dirroot . '/local/courseportfolio/form/file_form.php');
-//require_once($CFG->dirroot . '/local/courseportfolio/form/file_common_form.php');
-
 
 require_login();
 $PAGE->set_context(context_system::instance());
@@ -44,31 +40,8 @@ if (!is_siteadmin()) {
     print_error('nologinas');
 }
 
-//$courseform = new course_form();
-//$fileform = new file_form();
-//$filecommonform = new file_common_form();
-//
-//if ($courses = $courseform->get_data()) {
-//    $draftitemid = file_get_submitted_draft_itemid('coursefolders');
-//    var_dump($draftitemid);
-//    die('courseform');
-//}
-//
-//if ($files = $fileform->get_data()) {
-//    die('fileform');
-//}
-//
-//if ($commonfiles = $filecommonform->get_data()) {
-//    die('filecommonform');
-//}
-
 echo $OUTPUT->header();
-//$courseform->display();
-//$fileform->display();
-//$filecommonform->display();
-
 require_once($CFG->dirroot . '/local/courseportfolio/folder.php');
 require_once($CFG->dirroot . '/local/courseportfolio/folder_files.php');
 require_once($CFG->dirroot . '/local/courseportfolio/topic_files.php');
-
 echo $OUTPUT->footer();
