@@ -275,7 +275,6 @@ function courseportfolio_check_file($course, $sectionid, $filename) {
  */
 function courseportfolio_get_draft_upload_files($elemenname) {
     $draftitemid = file_get_submitted_draft_itemid($elemenname);
-    $draftitemid = 749053955;
     if (!empty($draftitemid)) {
         if ($contextid = courseportfolio_get_contextid_by_draftitemid($draftitemid)) {
             $fs = get_file_storage();
