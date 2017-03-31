@@ -166,7 +166,7 @@ function courseportfolio_get_courses_by_category($categoryid) {
  * @return object moduleinfo folder if create new folder
  *         int folderid if folder exits
  */
-function courseportfolio_check_folder($foldername, $folderdescription, $course, $section) {
+function courseportfolio_check_folder($foldername, $folderdescription, $course, $section, $draftitemid = '') {
     if (empty($foldername) && empty($folderdescription)) {
         return false;
     }
@@ -176,37 +176,37 @@ function courseportfolio_check_folder($foldername, $folderdescription, $course, 
         return $folder->id;
     }
 
-    $cw = get_fast_modinfo($course)->get_section_info($section);
-    if (!$module = $DB->get_record('modules', array('name' => COURSE_MODULE_FOLDER), 'id')) {
-        return false;
-    }
+    list($module, $context, $cw) = can_add_moduleinfo($course, COURSE_MODULE_FOLDER, $section);
 
     $cm = null;
     $data = new stdClass();
+    $data->id = '';
     $data->sr = 0;
     $data->return = 0;
     $data->display = 0;
-    $data->instance = 0;
+    $data->instance = '';
     $data->revision = 1;
     $data->cmidnumber = '';
     $data->showexpanded = 1;
     $data->section = $section;
     $data->course = $course->id;
     $data->module = $module->id;
+    $data->coursemodule = '';
     $data->visible = 1;
     $data->visibleold = 1;
     $data->add = COURSE_MODULE_FOLDER;
-    $data->modulename = COURSE_MODULE_FOLDER;
+    $data->modulename = $module->name;
     $data->groupmode = $course->groupmode;
     $data->groupingid = $course->defaultgroupingid;
     $data->mform_isexpanded_id_content = 1;
-    $data->files = 0;
+    $data->files = empty($draftitemid) ? 0 : $draftitemid;
     $data->name = $foldername;
     $data->introeditor = array(
         'text' => $folderdescription,
         'format' => FORMAT_HTML,
         'itemid' => file_get_unused_draft_itemid(),
     );
+
     $mform = new mod_folder_mod_form($data, $cw->section, $cm, $course);
 
     return add_moduleinfo($data, $course, $mform);
@@ -531,15 +531,16 @@ function courseportfolio_get_file_instance_by_name($filename, $attachmentfiles) 
  *         int folderid if folder exits
  *         false if folder exits
  */
-function courseportfolio_create_folder($categoryname, $coursename, $topicnumber, $foldername, $folderdescription) {
+function courseportfolio_create_folder($categoryname, $coursename, $topicnumber, $foldername, $folderdescription , $draftitemid = '') {
     if ($category = courseportfolio_check_category($categoryname, false)) {
         $course = courseportfolio_check_course($category, $coursename);
         if (courseportfolio_check_topic_number($course, $topicnumber)) {
-            if ($folder = courseportfolio_check_folder($foldername, $folderdescription, $course, $topicnumber)) {
+            if ($folder = courseportfolio_check_folder($foldername, $folderdescription, $course, $topicnumber, $draftitemid)) {
                 return $folder;
             }
         }
     }
+
     return false;
 }
 

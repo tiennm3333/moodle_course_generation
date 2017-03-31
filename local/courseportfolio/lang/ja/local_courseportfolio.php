@@ -44,3 +44,6 @@ $string['csvimportfolderfalse'] = 'フォルダーは登録できません。';
 $string['csvcontenterror'] = 'CSVファイルは登録できません。';
 $string['csvfileformaterror'] = 'CSVファイルのフォーマットは正しくありません。';
 $string['csvfileordererror'] = 'CSVファイルの形式でアップロードしてください。';
+
+$string['csvimportfolderfilessuccess'] = 'import flies success';
+$string['csvimportfolderfilesfalse'] = 'import folder false or folder exits';
