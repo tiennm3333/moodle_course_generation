@@ -74,9 +74,8 @@ if ($folderfilesdata = $folderfiles->get_data()) {
                     if (empty($line[0]) || empty($line[1]) || empty($line[2]) || empty($line[3]) || empty($line[4])) {
 
                     } else {
-//                        $folder = courseportfolio_create_folder($line[0], $line[1], $line[2], $line[3], $line[4], $draftitemid);
-                        $folderfiles = courseportfolio_create_folder_files($line[0], $line[1], $line[2], $line[3], $line[4], $draftitemid, $file->get_filename(), $contextid, 'folderfiles');
-                        if ($folderfiles && is_object($folderfiles)) {
+                        $folder = courseportfolio_create_folder($line[0], $line[1], $line[2], $line[3], $line[4], $draftitemid);
+                        if ($folder && is_object($folder)) {
                             $countsucess++;
                         }
                     }
@@ -90,11 +89,9 @@ if ($folderfilesdata = $folderfiles->get_data()) {
 
     echo '<div class="message">';
     if ($countsucess) {
-//        echo  get_string('csvimportfolderfilessuccess', 'local_courseportfolio');
-        echo  'import flies success';
+        echo  get_string('csvimportfolderfilessuccess', 'local_courseportfolio');
     } else {
-//        echo  get_string('csvimportfolderfilesfalse', 'local_courseportfolio');
-        echo  'import folder false or folder exits';
+        echo  get_string('csvimportfolderfilesfalse', 'local_courseportfolio');
     }
     echo '</div>';
 }
