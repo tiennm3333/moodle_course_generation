@@ -32,11 +32,11 @@ $string['title/files'] = 'Import Files';
 $string['title/common_files'] = 'Import Files Common';
 
 $string['folders'] = '';
-$string['folders_help'] = '';
+$string['folders_help'] = '下記フォーマットのCSVファイルをアップロードしてください。<br>コースカテゴリ,コース名,トピックNo,フォルダ名,説明';
 $string['folderfiles'] = '';
-$string['folderfiles_help'] = '';
+$string['folderfiles_help'] = '以下の構成でファイルをアップロードしてください。<br>１．登録先情報のCSVファイル（ファイル名, import.csv）<br>２．登録するファイル（複数)<br><br>CSVファイルのフォーマット<br>コースカテゴリ,コース名,トピックNo. , フォルダ名, ファイル名';
 $string['topicfiles'] = '';
-$string['topicfiles_help'] = '';
+$string['topicfiles_help'] = '以下の構成でファイルをアップロードしてください。<br>１．登録先情報のCSVファイル（ファイル名, file.csv）<br>２．登録するファイル（複数)<br><br>CSVファイルのフォーマット<br>コースカテゴリ, トピックNo. , ファイル名';
 $string['uploadbutton'] = 'Upload';
 
 $string['csvimportfoldersuccess'] = 'フォルダー登録ができました。';

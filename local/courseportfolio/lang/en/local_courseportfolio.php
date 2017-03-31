@@ -32,11 +32,11 @@ $string['title/files'] = 'Import Files';
 $string['title/common_files'] = 'Import Files Common';
 
 $string['folders'] = '';
-$string['folders_help'] = '';
+$string['folders_help'] = 'Please upload a CSV file as below.<br>Course Category,Course name,Topic No,Folder name,Description';
 $string['folderfiles'] = '';
-$string['folderfiles_help'] = '';
+$string['folderfiles_help'] = 'Upload CSV files as below <br>1.CSV file registered（file.csv）<br>2.registered Files<br><br>Format file.csv<br>Category,Course name,Topic No,Folder name,File name';
 $string['topicfiles'] = '';
-$string['topicfiles_help'] = '';
+$string['topicfiles_help'] = 'Upload CSV files as below <br>1.CSV file registered（file.csv）<br>2.registered Files<br><br>Format file.csv<br>Category,Topic No,File name';
 $string['uploadbutton'] = 'Upload';
 
 $string['csvimportfoldersuccess'] = 'import folder success';
