@@ -37,5 +37,10 @@ $string['folderfiles'] = '';
 $string['folderfiles_help'] = '';
 $string['topicfiles'] = '';
 $string['topicfiles_help'] = '';
-
 $string['uploadbutton'] = 'Upload';
+
+$string['csvimportfoldersuccess'] = 'フォルダー登録ができました。';
+$string['csvimportfolderfalse'] = 'フォルダーは登録できません。';
+$string['csvcontenterror'] = 'CSVファイルは登録できません。';
+$string['csvfileformaterror'] = 'CSVファイルのフォーマットは正しくありません。';
+$string['csvfileordererror'] = 'CSVファイルの形式でアップロードしてください。';

@@ -37,7 +37,12 @@ $string['folderfiles'] = '';
 $string['folderfiles_help'] = '';
 $string['topicfiles'] = '';
 $string['topicfiles_help'] = '';
-
 $string['uploadbutton'] = 'Upload';
+
+$string['csvimportfoldersuccess'] = 'import folder success';
+$string['csvimportfolderfalse'] = 'import folder false or folder exits';
+$string['csvcontenterror'] = 'csv content file error';
+$string['csvfileformaterror'] = 'csv file type not support encoding';
+$string['csvfileordererror'] = 'the first file import must have csv extension';
 
 

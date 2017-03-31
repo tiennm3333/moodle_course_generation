@@ -24,7 +24,7 @@
  * @copyright  2017 (C) VERSION2, INC.
  */
 
-require_once(__DIR__ . "/../../config.php");
+require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/local/courseportfolio/form/folders_form.php');
 require_login();
 
@@ -39,12 +39,12 @@ if ($foldersdata = $folders->get_data()) {
     foreach ($files as $file) {
         if (!$i) {
             if (pathinfo($file->get_filename(), PATHINFO_EXTENSION) != 'csv') {
-                print_error('the first file import must have csv extension');
+                print_error(get_string('csvfileordererror', 'local_courseportfolio'));
                 break;
             }
             if ($csvdata = $file->get_content()) {
                 if (!$encoding = mb_detect_encoding($csvdata, 'UTF-8, JIS, SJIS, EUC-JP')) {
-                    print_error('csv file type not support encoding');
+                    print_error(get_string('csvfileformaterror', 'local_courseportfolio'));
                     break;
                 }
 
@@ -54,7 +54,7 @@ if ($foldersdata = $folders->get_data()) {
 
                 $csvloaderror = $cir->get_error();
                 if (!is_null($csvloaderror)) {
-                    print_error('csv file error');
+                    print_error(get_string('csvcontenterror', 'local_courseportfolio'));
                     break;
                 }
 
@@ -86,11 +86,13 @@ if ($foldersdata = $folders->get_data()) {
         $i++;
     }
 
+    echo '<div class="message">';
     if ($countsucess) {
-        echo  'import folder success';
+        echo  get_string('csvimportfoldersuccess', 'local_courseportfolio');
     } else {
-        echo  'import folder false or folder exits';
+        echo  get_string('csvimportfolderfalse', 'local_courseportfolio');
     }
+    echo '</div>';
 }
 
 $folders->display();
