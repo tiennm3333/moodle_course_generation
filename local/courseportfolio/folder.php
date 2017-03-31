@@ -36,15 +36,16 @@ if ($foldersdata = $folders->get_data()) {
     $fs = get_file_storage();
     $files = $fs->get_area_files($contextid, 'user', 'draft', $draftitemid, 'id ASC', false);
     $i = 0;
+    $countsucess = 0;
     foreach ($files as $file) {
         if (!$i) {
             if (pathinfo($file->get_filename(), PATHINFO_EXTENSION) != 'csv') {
-                print_error(get_string('csvfileordererror', 'local_courseportfolio'));
+                echo get_string('csvfileordererror', 'local_courseportfolio');
                 break;
             }
             if ($csvdata = $file->get_content()) {
                 if (!$encoding = mb_detect_encoding($csvdata, 'UTF-8, JIS, SJIS, EUC-JP')) {
-                    print_error(get_string('csvfileformaterror', 'local_courseportfolio'));
+                    echo get_string('csvfileformaterror', 'local_courseportfolio');
                     break;
                 }
 
@@ -54,13 +55,13 @@ if ($foldersdata = $folders->get_data()) {
 
                 $csvloaderror = $cir->get_error();
                 if (!is_null($csvloaderror)) {
-                    print_error(get_string('csvcontenterror', 'local_courseportfolio'));
+                    echo get_string('csvcontenterror', 'local_courseportfolio');
                     break;
                 }
 
                 $cir->init();
                 $linenum = 1; //column header is first line
-                $countsucess = 0;
+
                 while ($line = $cir->next()) {
                     $linenum++;
                     /*
