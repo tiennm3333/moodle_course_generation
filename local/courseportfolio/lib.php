@@ -84,7 +84,7 @@ function courseportfolio_get_topics_by_courses($courses, $sectionnumber, &$inval
  * @param string $categoryname
  * @return object $category if exits or create new
  */
-function courseportfolio_check_category($categoryname, $createnew=true) {
+function courseportfolio_check_category($categoryname, $createnew = true) {
     if (empty($categoryname)) {
         return false;
     }
@@ -532,7 +532,7 @@ function courseportfolio_get_file_instance_by_name($filename, $attachmentfiles) 
  *         false if folder exits
  */
 function courseportfolio_create_folder($categoryname, $coursename, $topicnumber, $foldername, $folderdescription , $draftitemid = '') {
-    if ($category = courseportfolio_check_category($categoryname, false)) {
+    if ($category = courseportfolio_check_category($categoryname)) {
         $course = courseportfolio_check_course($category, $coursename);
         if (courseportfolio_check_topic_number($course, $topicnumber)) {
             if ($folder = courseportfolio_check_folder($foldername, $folderdescription, $course, $topicnumber, $draftitemid)) {
