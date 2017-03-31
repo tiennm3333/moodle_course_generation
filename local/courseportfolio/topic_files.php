@@ -24,16 +24,28 @@
  * @copyright  2017 (C) VERSION2, INC.
  */
 
-require_once(__DIR__ . "/../../config.php");
+require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/local/courseportfolio/form/topic_files_form.php');
 require_login();
 
 $topicfiles = new topic_files_form();
 
 if ($topicfilesdata = $topicfiles->get_data()) {
-    $draftitemid = file_get_submitted_draft_itemid('topicfiles');
-    var_dump($draftitemid);
-    die('topicfiles');
+    $draftfiles = courseportfolio_get_draft_upload_files('topicfiles');
+    if (!empty($draftfiles) && is_array($draftfiles)) {
+        try {
+            $configfile = array_shift(array_values($draftfiles));
+            $results = courseportfolio_import_common_files($configfile, $draftfiles);
+        } catch (CsvFileOrderErrorException $e) {
+        
+        } catch (CsvFileFormatErrorException $e) {
+        
+        } catch (CsvContentErrorException $e) {
+        
+        } catch (Exception $e) {
+        
+        }
+    }
 }
 
 $topicfiles->display();
