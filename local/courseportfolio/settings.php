@@ -27,6 +27,6 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
-    $ADMIN->add('location', new admin_category('courseportfolio', get_string('courseportfolio','local_courseportfolio')));
+    $ADMIN->add('localplugins', new admin_category('courseportfolio', get_string('courseportfolio','local_courseportfolio')));
     $ADMIN->add('courseportfolio', new admin_externalpage('setting', get_string('setting','local_courseportfolio'), $CFG->wwwroot . '/local/courseportfolio/courseportfolio.php'));
 }
