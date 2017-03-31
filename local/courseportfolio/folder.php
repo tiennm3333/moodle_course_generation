@@ -74,7 +74,7 @@ if ($foldersdata = $folders->get_data()) {
                     if (empty($line[0]) || empty($line[1]) || empty($line[2]) || empty($line[3]) || empty($line[4])) {
 
                     } else {
-                        $folder = courseportfolio_create_folder($line[0], $line[1], $line[2], $line[3], $line[4]);
+                        $folder = courseportfolio_create_folder($line[0], $line[1], $line[2], $line[3], $line[4], '', COURSE_MODULE_FOLDER);
                         if ($folder && is_object($folder)) {
                             $countsucess++;
                         }

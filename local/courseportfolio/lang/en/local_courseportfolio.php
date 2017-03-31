@@ -24,7 +24,7 @@
  * @copyright  2017 (C) VERSION2, INC.
  */
 
-$string['courseportfolio'] = 'Class support import';
+$string['courseportfolio'] = 'Courses support import';
 $string['setting'] = 'Setting';
 
 $string['title/courses'] = 'Import Courses/Folders';
@@ -44,5 +44,8 @@ $string['csvimportfolderfalse'] = 'import folder false or folder exits';
 $string['csvcontenterror'] = 'csv content file error';
 $string['csvfileformaterror'] = 'csv file type not support encoding';
 $string['csvfileordererror'] = 'the first file import must have csv extension';
+
+$string['csvimportfolderfilessuccess'] = 'import flies success';
+$string['csvimportfolderfilesfalse'] = 'import folder false or folder exits';
 
 
