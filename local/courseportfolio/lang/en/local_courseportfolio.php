@@ -45,7 +45,5 @@ $string['csvcontenterror'] = 'csv content file error';
 $string['csvfileformaterror'] = 'csv file type not support encoding';
 $string['csvfileordererror'] = 'the first file import must have csv extension';
 
-$string['csvimportfolderfilessuccess'] = 'import flies success';
-$string['csvimportfolderfilesfalse'] = 'import folder false or folder exits';
-
+$string['csvimportfolderfilesresult'] = 'import flies success with: {$a->totalfileimported} / {$a->totalfile} files';
 
