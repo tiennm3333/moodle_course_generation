@@ -513,7 +513,7 @@ function courseportfolio_import_folders($fileconfig) {
         $importreader->close();
         $importreader->cleanup(true);
     }
-    return array($totalfile, $totalfileimported);
+    return array('totalfolders' => $totalfile, 'sucessfolders' => $totalfileimported);
 }
 
 /**
@@ -964,10 +964,13 @@ function courseportfolio_generate_result_report($type, $results) {
         switch ($type) {
             case IMPORT_FOLDER:
                 $html = courseportfolio_generate_folder_result($results);
+                break;
             case IMPORT_FOLDER_FILE:
                 $html = courseportfolio_generate_folder_file_result($results);
+                break;
             case IMPORT_TOPIC_FILE:
                 $html = courseportfolio_generate_common_file_result($results);
+                break;
         }
     }
     return courseportfolio_generate_back_button($html);
