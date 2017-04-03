@@ -35,7 +35,7 @@ if ($folderfilesdata = $folderfiles->get_data()) {
     if (!empty($draftfiles) && is_array($draftfiles)) {
         try {
             $results = courseportfolio_import_folder_files(courseportfolio_get_import_config_file(IMPORT_FOLDER_CONFIG_FILE, $draftfiles), $draftfiles);
-            courseportfolio_import_result_report(IMPORT_FOLDER_FILE, $results);s
+            courseportfolio_import_result_report(IMPORT_FOLDER_FILE, $results);
         } catch (CsvFileOrderErrorException $e) {
             courseportfolio_import_error_report(IMPORT_FOLDER_FILE, $e);
         } catch (CsvFileFormatErrorException $e) {
