@@ -588,7 +588,7 @@ function courseportfolio_genereate_import_result($topicnumber, $invalidcourses, 
  * @param array $attachmentfiles
  * @return int | boolean
  */
-function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnumber, $foldername, $filename, $attachmentfiles, $filenameimported) {
+function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnumber, $foldername, $filename, $attachmentfiles, &$filenameimported = array()) {
     if (!$file = courseportfolio_get_file_instance_by_name($filename, $attachmentfiles)) {
         return false;
     }
