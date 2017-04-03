@@ -44,11 +44,9 @@ $string['csvfileordererror'] = 'CSVファイルの形式でアップロードし
 $string['csvimportfolderfilesresult'] = '指定された{$a->totalfile}個のファイルのうち、{$a->totalfileimported}個のファイルが登録されました';
 $string['configuarationfileerror'] = '%sファイルをアップロードしてください';
 $string['configuarationfilecontenterror'] = 'CSVファイルのフォーマットは正しくありません。';
-$string['importerror'] = 'インポートエラー';
-$string['importsuccess'] = '輸入成功';
-
 $string['importcommonfiletopicerror'] = '%sコースに指定された%sトピックが存在しませんでした。';
 $string['importcommonfiletopicsuccess'] = '%s件のファイルが%s件のコースに登録されました。';
 $string['importcommonfilefoldersuccess'] = '%s件のフォルダーが%s件のコースに登録されました。';
 $string['reporttitle'] = '登録結果';
 $string['csvimportfoldersresult'] = '指定された{$a->totalfolder}個のフォルダーのうち、{$a->totalfolderimported}個のフォルダーが登録されました';
+$string['nothingimported'] = 'ファイルは一個も登録されません。';
