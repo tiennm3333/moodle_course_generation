@@ -44,10 +44,8 @@ $string['csvfileordererror'] = 'the first file import must have csv extension';
 $string['csvimportfolderfilesresult'] = 'import flies success with: {$a->totalfileimported} / {$a->totalfile} files';
 $string['configuarationfileerror'] = 'Please upload the configuaration file named %s';
 $string['configuarationfilecontenterror'] = 'Configuration file content is not valid';
-$string['importerror'] = 'Import error';
-$string['importsuccess'] = 'Import success';
-
 $string['importcommonfiletopicerror'] = 'Course %s doesn\'t contain topic %s.';
 $string['importcommonfiletopicsuccess'] = '%s file (s) has been imported into %s course (s).';
 $string['reporttitle'] = 'Import results';
 $string['csvimportfoldersresult'] = 'import folders success with: {$a->totalfolderimported} / {$a->totalfolder} folders';
+$string['nothingimported'] = 'No file has been imported.';
