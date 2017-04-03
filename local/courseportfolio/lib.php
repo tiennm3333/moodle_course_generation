@@ -45,7 +45,7 @@ function courseportfolio_check_topic_number($course, $topicnumber) {
     $courseformat = course_get_format($course->id);
     $formatoptions = $courseformat->get_format_options();
 
-    if (isset($formatoptions['numsections']) && $formatoptions['numsections'] != $topicnumber) {
+    if (isset($formatoptions['numsections']) && $formatoptions['numsections'] < $topicnumber) {
         $dataupdatecourseformat = (object)array('id' => $course->id, 'numsections' => $topicnumber);
         $changed =  $courseformat->update_course_format_options($dataupdatecourseformat);
     }
@@ -166,8 +166,8 @@ function courseportfolio_get_courses_by_category($categoryid) {
  * @return object moduleinfo folder if create new folder
  *         int folderid if folder exits
  */
-function courseportfolio_check_folder($foldername, $folderdescription, $course, $section, $draftitemid = '') {
-    if (empty($foldername) && empty($folderdescription)) {
+function courseportfolio_check_folder($foldername, $folderdescription, $course, $section) {
+    if (empty($foldername) && empty($folderdescription) || !is_numeric($section)) {
         return false;
     }
 
@@ -423,9 +423,50 @@ function courseportfolio_import_common_files($fileconfig, $attachmentfiles) {
 function courseportfolio_import_folder_files($fileconfig, $attachmentfiles) {
     if ($importreader = courseportfolio_get_csv_import_reader_instance($fileconfig, 'folderfiles', $totalfile)) {
         $totalfileimported = 0;
+
+        // import fist line of file csv
+        $firstline = courseportfolio_get_csv_fisrt_line($importreader);
+        if (!empty($firstline[0]) && !empty($firstline[1]) && !empty($firstline[2]) && !empty($firstline[3]) && !empty($firstline[4])) {
+            if (courseportfolio_import_folfer_file($firstline[0], $firstline[1], $firstline[2], $firstline[3], $firstline[4], $attachmentfiles)) {
+                $totalfileimported++;
+            }
+        }
+
         while ($line = $importreader->next()) {
             if (!empty($line[0]) && !empty($line[1]) && !empty($line[2]) && !empty($line[3]) && !empty($line[4])) {
                 if (courseportfolio_import_folfer_file($line[0], $line[1], $line[2], $line[3], $line[4], $attachmentfiles)) {
+                    $totalfileimported++;
+                }
+            }
+        }
+        $importreader->close();
+        $importreader->cleanup(true);
+    }
+    return array($totalfile, $totalfileimported);
+}
+
+/**
+ * Import folders
+ *
+ * @param object $fileconfig
+ * @return mixed array
+ */
+function courseportfolio_import_folders($fileconfig) {
+    if ($importreader = courseportfolio_get_csv_import_reader_instance($fileconfig, 'folders', $totalfile)) {
+        $totalfileimported = 0;
+
+        // import fist line of file csv
+        $firstline = courseportfolio_get_csv_fisrt_line($importreader);
+        if (!empty($firstline[0]) && !empty($firstline[1]) && !empty($firstline[2]) && !empty($firstline[3]) && !empty($firstline[4])) {
+            if (courseportfolio_import_folfer($firstline[0], $firstline[1], $firstline[2], $firstline[3], $firstline[4])) {
+                $totalfileimported++;
+            }
+        }
+
+        // import from the second line to end of file csv
+        while ($line = $importreader->next()) {
+            if (!empty($line[0]) && !empty($line[1]) && !empty($line[2]) && !empty($line[3]) && !empty($line[4])) {
+                if (courseportfolio_import_folfer($line[0], $line[1], $line[2], $line[3], $line[4])) {
                     $totalfileimported++;
                 }
             }
@@ -509,6 +550,34 @@ function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnu
     }
 
     return courseportfolio_create_file_activity_for_folders($folderid->id, $file);
+}
+
+/**
+ * Import folder
+ *
+ * @param string $categoryname
+ * @param string $coursename
+ * @param int $topicnumber
+ * @param string $foldername
+ * @param string $folderdescription
+ * @return boolean
+ */
+function courseportfolio_import_folfer($categoryname, $coursename, $topicnumber, $foldername, $folderdescription) {
+    if (!$categoryid = courseportfolio_check_category($categoryname)) {
+        return false;
+    }
+
+    if (!$course = courseportfolio_check_course($categoryid, $coursename)) {
+        return false;
+    }
+
+    if (courseportfolio_check_topic_number($course, $coursename)) {
+        if ($folder = courseportfolio_check_folder($foldername, $folderdescription, $course, $topicnumber)) {
+            return $folder;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -684,6 +753,24 @@ function courseportfolio_get_course_modules_by_folder_name($folderid) {
     return $DB->get_record_sql($sql, $params);
 
 }
+
+/**
+ * get first line of csv content
+ *
+ * @param object $importreader
+ * @return object $coursemodule if exits | false
+ */
+function courseportfolio_get_csv_fisrt_line($importreader) {
+    $arrdata = (array)$importreader;
+    foreach ($arrdata as $value) {
+        if (is_array($value)) {
+            return $value;
+        }
+    }
+
+    return false;
+}
+
 
 /**
  * get contextid by draftitemid

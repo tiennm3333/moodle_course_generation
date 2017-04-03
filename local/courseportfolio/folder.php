@@ -31,69 +31,32 @@ require_login();
 $folders = new folders_form();
 
 if ($foldersdata = $folders->get_data()) {
-    $draftitemid = file_get_submitted_draft_itemid('folders');
-    $contextid = courseportfolio_get_contextid_by_draftitemid($draftitemid);
-    $fs = get_file_storage();
-    $files = $fs->get_area_files($contextid, 'user', 'draft', $draftitemid, 'id ASC', false);
-    $i = 0;
-    $countsucess = 0;
-    foreach ($files as $file) {
-        if (!$i) {
-            if (pathinfo($file->get_filename(), PATHINFO_EXTENSION) != 'csv') {
-                echo get_string('csvfileordererror', 'local_courseportfolio');
-                break;
-            }
-            if ($csvdata = $file->get_content()) {
-                if (!$encoding = mb_detect_encoding($csvdata, 'UTF-8, JIS, SJIS, EUC-JP')) {
-                    echo get_string('csvfileformaterror', 'local_courseportfolio');
-                    break;
-                }
+    $draftfiles = courseportfolio_get_draft_upload_files('folders');
+    if (!empty($draftfiles) && is_array($draftfiles)) {
+        try {
+            $draftfilesvalue = array_values($draftfiles);
+            $configfile = array_shift($draftfilesvalue);
+            list($totalfile, $totalfileimported) = courseportfolio_import_folders($configfile, $draftfiles);
 
-                $iid = csv_import_reader::get_new_iid('coursefolderfiles');
-                $cir = new csv_import_reader($iid, 'coursefolderfiles');
-                $csvtotalline = $cir->load_csv_content($csvdata, $encoding, 'comma');
+            $a = new stdClass();
+            $a->totalfolder = $totalfile;
+            $a->totalfolderimported = $totalfileimported;
 
-                $csvloaderror = $cir->get_error();
-                if (!is_null($csvloaderror)) {
-                    echo get_string('csvcontenterror', 'local_courseportfolio');
-                    break;
-                }
+            echo '<div class="message">';
+            echo  get_string('csvimportfoldersresult', 'local_courseportfolio', $a);
+            echo '</div>';
 
-                $cir->init();
-                $linenum = 1; //column header is first line
+        } catch (CsvFileOrderErrorException $e) {
 
-                while ($line = $cir->next()) {
-                    $linenum++;
-                    /*
-                        $categoryname = $line[0];
-                        $coursename = $line[1];
-                        $topicnumber = $line[2];
-                        $foldername = $line[3];
-                        $folderdescription = $line[4];
-                    */
-                    if (empty($line[0]) || empty($line[1]) || empty($line[2]) || empty($line[3]) || empty($line[4])) {
+        } catch (CsvFileFormatErrorException $e) {
 
-                    } else {
-                        $folder = courseportfolio_create_folder($line[0], $line[1], $line[2], $line[3], $line[4], '');
-                        if ($folder && is_object($folder)) {
-                            $countsucess++;
-                        }
-                    }
-                }
-                $cir->close();
-                $cir->cleanup(true);
-            }
+        } catch (CsvContentErrorException $e) {
+
+        } catch (Exception $e) {
+
         }
-        $i++;
     }
 
-    echo '<div class="message">';
-    if ($countsucess) {
-        echo  get_string('csvimportfoldersuccess', 'local_courseportfolio');
-    } else {
-        echo  get_string('csvimportfolderfalse', 'local_courseportfolio');
-    }
-    echo '</div>';
 }
 
 $folders->display();

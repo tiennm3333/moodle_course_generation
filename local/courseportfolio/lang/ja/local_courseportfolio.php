@@ -46,3 +46,4 @@ $string['csvfileformaterror'] = 'CSVファイルのフォーマットは正し�
 $string['csvfileordererror'] = 'CSVファイルの形式でアップロードしてください。';
 
 $string['csvimportfolderfilesresult'] = '指定された{$a->totalfile}個のファイルのうち、{$a->totalfileimported}個のファイルが登録されました';
+$string['csvimportfoldersresult'] = '指定された{$a->totalfolder}個のフォルダーのうち、{$a->totalfolderimported}個のフォルダーが登録されました';
