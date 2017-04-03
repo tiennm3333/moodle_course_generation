@@ -630,7 +630,7 @@ function courseportfolio_import_folfer($categoryname, $coursename, $topicnumber,
         return false;
     }
 
-    if (courseportfolio_check_topic_number($course, $coursename)) {
+    if (courseportfolio_check_topic_number($course, $topicnumber)) {
         if ($folder = courseportfolio_check_folder($foldername, $folderdescription, $course, $topicnumber)) {
             return $folder;
         }
