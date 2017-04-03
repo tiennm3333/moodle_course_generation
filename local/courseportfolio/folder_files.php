@@ -34,26 +34,16 @@ if ($folderfilesdata = $folderfiles->get_data()) {
     $draftfiles = courseportfolio_get_draft_upload_files('folderfiles');
     if (!empty($draftfiles) && is_array($draftfiles)) {
         try {
-            $draftfilesvalue = array_values($draftfiles);
-            $configfile = array_shift($draftfilesvalue);
-            list($totalfile, $totalfileimported) = courseportfolio_import_folder_files($configfile, $draftfiles);
-
-            $a = new \stdClass();
-            $a->totalfile = $totalfile;
-            $a->totalfileimported = $totalfileimported;
-
-            echo '<div class="message">';
-            echo  get_string('csvimportfolderfilesresult', 'local_courseportfolio', $a);
-            echo '</div>';
-
+            $results = courseportfolio_import_folder_files(courseportfolio_get_import_config_file(IMPORT_FOLDER_CONFIG_FILE, $draftfiles), $draftfiles);
+            courseportfolio_import_result_report(IMPORT_FOLDER_FILE, $results);s
         } catch (CsvFileOrderErrorException $e) {
-
+            courseportfolio_import_error_report(IMPORT_FOLDER_FILE, $e);
         } catch (CsvFileFormatErrorException $e) {
-
+            courseportfolio_import_error_report(IMPORT_FOLDER_FILE, $e);
         } catch (CsvContentErrorException $e) {
-
+            courseportfolio_import_error_report(IMPORT_FOLDER_FILE, $e);
         } catch (Exception $e) {
-
+            courseportfolio_import_error_report(IMPORT_FOLDER_FILE, $e);
         }
     }
 }

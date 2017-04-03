@@ -38,7 +38,7 @@ class folders_form extends moodleform {
         $mform->addElement('html', '</h2>');
         $mform->addElement('html', '</div>');
 
-        $mform->addElement('filemanager', 'folders', get_string('introattachments', 'assign'), null, array('subdirs' => 0, 'accepted_types' => '*'));
+        $mform->addElement('filemanager', 'folders', get_string('introattachments', 'assign'), null, array('subdirs' => 0, 'accepted_types' => '.csv', 'maxfiles' => 1));
         $mform->addHelpButton('folders', 'folders', 'local_courseportfolio');
 
         $buttonarray = array();

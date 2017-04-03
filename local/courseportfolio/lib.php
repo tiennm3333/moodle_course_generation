@@ -425,6 +425,16 @@ function courseportfolio_get_csv_import_reader_instance($file, $type, &$csvtotal
 function courseportfolio_import_common_files($fileconfig, $attachmentfiles) {
     $report = array();
     if ($importreader = courseportfolio_get_csv_import_reader_instance($fileconfig, 'topicfiles')) {
+
+        // import fist line of file csv
+        $firstline = courseportfolio_get_csv_fisrt_line($importreader);
+        if (!empty($firstline[0]) && !empty($firstline[1]) && !empty($firstline[2])) {
+            if ($results = courseportfolio_import_common_file(courseportfolio_normalize_input($firstline[0]), courseportfolio_normalize_input($firstline[1]), courseportfolio_normalize_input($firstline[2]), $attachmentfiles)) {
+                $report[] = $results;
+            }
+        }
+
+        // import from the second line to end of file csv
         while ($line = $importreader->next()) {
             if (!empty($line[0]) && !empty($line[1]) && !empty($line[2])) {
                 if ($results = courseportfolio_import_common_file(courseportfolio_normalize_input($line[0]), courseportfolio_normalize_input($line[1]), courseportfolio_normalize_input($line[2]), $attachmentfiles)) {
@@ -452,14 +462,15 @@ function courseportfolio_import_folder_files($fileconfig, $attachmentfiles) {
         // import fist line of file csv
         $firstline = courseportfolio_get_csv_fisrt_line($importreader);
         if (!empty($firstline[0]) && !empty($firstline[1]) && !empty($firstline[2]) && !empty($firstline[3]) && !empty($firstline[4])) {
-            if (courseportfolio_import_folfer_file($firstline[0], $firstline[1], $firstline[2], $firstline[3], $firstline[4], $attachmentfiles)) {
+            if (courseportfolio_import_folfer_file(courseportfolio_normalize_input($firstline[0]), courseportfolio_normalize_input($firstline[1]), courseportfolio_normalize_input($firstline[2]),courseportfolio_normalize_input($firstline[3]), courseportfolio_normalize_input($firstline[4]), $attachmentfiles)) {
                 $totalfileimported++;
             }
         }
 
+        // import from the second line to end of file csv
         while ($line = $importreader->next()) {
             if (!empty($line[0]) && !empty($line[1]) && !empty($line[2]) && !empty($line[3]) && !empty($line[4])) {
-                if (courseportfolio_import_folfer_file($line[0], $line[1], $line[2], $line[3], $line[4], $attachmentfiles)) {
+                if (courseportfolio_import_folfer_file(courseportfolio_normalize_input($line[0]), courseportfolio_normalize_input($line[1]), courseportfolio_normalize_input($line[2]),courseportfolio_normalize_input($line[3]), courseportfolio_normalize_input($line[4]), $attachmentfiles)) {
                     $totalfileimported++;
                 }
             }
@@ -467,7 +478,8 @@ function courseportfolio_import_folder_files($fileconfig, $attachmentfiles) {
         $importreader->close();
         $importreader->cleanup(true);
     }
-    return array($totalfile, $totalfileimported);
+
+    return array('totalfiles' => $totalfile, 'sucessfiles' => $totalfileimported);
 }
 
 /**
@@ -483,7 +495,7 @@ function courseportfolio_import_folders($fileconfig) {
         // import fist line of file csv
         $firstline = courseportfolio_get_csv_fisrt_line($importreader);
         if (!empty($firstline[0]) && !empty($firstline[1]) && !empty($firstline[2]) && !empty($firstline[3]) && !empty($firstline[4])) {
-            if (courseportfolio_import_folfer($firstline[0], $firstline[1], $firstline[2], $firstline[3], $firstline[4])) {
+            if (courseportfolio_import_folfer(courseportfolio_normalize_input($firstline[0]), courseportfolio_normalize_input($firstline[1]), courseportfolio_normalize_input($firstline[2]), courseportfolio_normalize_input($firstline[3]), courseportfolio_normalize_input($firstline[4]))) {
                 $totalfileimported++;
             }
         }
@@ -491,7 +503,7 @@ function courseportfolio_import_folders($fileconfig) {
         // import from the second line to end of file csv
         while ($line = $importreader->next()) {
             if (!empty($line[0]) && !empty($line[1]) && !empty($line[2]) && !empty($line[3]) && !empty($line[4])) {
-                if (courseportfolio_import_folfer($line[0], $line[1], $line[2], $line[3], $line[4])) {
+                if (courseportfolio_import_folfer(courseportfolio_normalize_input($line[0]), courseportfolio_normalize_input($line[1]), courseportfolio_normalize_input($line[2]),courseportfolio_normalize_input($line[3]), courseportfolio_normalize_input($line[4]))) {
                     $totalfileimported++;
                 }
             }
@@ -970,7 +982,7 @@ function courseportfolio_generate_result_report($type, $results) {
             case IMPORT_FOLDER:
                 return get_string('configuarationfileerror', 'local_courseportfolio');
             case IMPORT_FOLDER_FILE:
-                return get_string('configuarationfilecontenterror', 'local_courseportfolio');
+                $html = courseportfolio_generate_folder_file_result($results);
             case IMPORT_TOPIC_FILE:
                 $html = courseportfolio_generate_common_file_result($results);
         }
@@ -1003,6 +1015,26 @@ function courseportfolio_generate_common_file_result($results) {
 }
 
 /**
+ * Generate import folder file report
+ *
+ * @param array $results
+ * @return string html
+ */
+function courseportfolio_generate_folder_file_result($results) {
+    $sucessfiles = 0;
+    $totalfiles = 0;
+
+    if(!empty($results['sucessfiles']) && isset($results['sucessfiles'])) {
+        $sucessfiles = $results['sucessfiles'];
+    }
+    if(!empty($results['totalfiles']) && isset($results['totalfiles'])) {
+        $totalfiles = $results['totalfiles'];
+    }
+
+    return courseportfolio_generate_back_button(courseportfolio_generate_folder_files_success($sucessfiles, $totalfiles));
+}
+
+/**
  * Generate import common file error report
  * 
  * @param string $topic
@@ -1029,6 +1061,19 @@ function courseportfolio_generate_common_file_error($topic, $courses) {
 function courseportfolio_generate_common_file_success($sucessfiles, $sucesscourses) {
     $successhtml = html_writer::tag('div', get_string('importsuccess', 'local_courseportfolio'), array('class' => 'alert alert-block alert-info'));
     $successhtml .= html_writer::tag('p', sprintf(get_string('importcommonfiletopicsuccess', 'local_courseportfolio'), $sucessfiles, $sucesscourses));
+    return $successhtml;
+}
+
+/**
+ * Generate import folder file success report
+ *
+ * @param int $sucessfiles
+ * @param int $totalfiles
+ * @return string
+ */
+function courseportfolio_generate_folder_files_success($sucessfiles, $totalfiles) {
+    $successhtml = html_writer::tag('div', get_string('importsuccess', 'local_courseportfolio'), array('class' => 'alert alert-block alert-info'));
+    $successhtml .= html_writer::tag('p', sprintf(get_string('importcommonfilefoldersuccess', 'local_courseportfolio'), $sucessfiles, $totalfiles));
     return $successhtml;
 }
 

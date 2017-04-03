@@ -47,13 +47,13 @@ if ($foldersdata = $folders->get_data()) {
             echo '</div>';
 
         } catch (CsvFileOrderErrorException $e) {
-
+            courseportfolio_import_error_report(IMPORT_FOLDER, $e);
         } catch (CsvFileFormatErrorException $e) {
-
+            courseportfolio_import_error_report(IMPORT_FOLDER, $e);
         } catch (CsvContentErrorException $e) {
-
+            courseportfolio_import_error_report(IMPORT_FOLDER, $e);
         } catch (Exception $e) {
-
+            courseportfolio_import_error_report(IMPORT_FOLDER, $e);
         }
     }
 
