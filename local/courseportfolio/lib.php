@@ -70,13 +70,13 @@ function courseportfolio_get_topics_by_courses($courses, $sectionnumber, &$inval
     if (!empty($courses) && is_array($courses)) {
         foreach ($courses as $course) {
             if (!isset($course->id)) {
-                $invalidcourses[] = $course->id;
+                $invalidcourses[] = $course->fullname;
                 continue;
             }
             $courseformat = course_get_format($course->id);
             $section = $courseformat->get_section($sectionnumber);
             if (is_null($section)) {
-                $invalidcourses[] = $course->id;
+                $invalidcourses[] = $course->fullname;
                 continue;
             }
             $topics[] = $section;
@@ -937,7 +937,7 @@ function courseportfolio_generate_report($error, $type, $results) {
     if (!empty($error)) {
         return courseportfolio_generate_error_report($type, $error);
     }
-    if (!empty($type) && !empty($results) && is_array($results)) {
+    if (!empty($type)) {
         return courseportfolio_generate_result_report($type, $results);
     }
     return '';
@@ -965,7 +965,7 @@ function courseportfolio_generate_error_report($type, $error) {
  */
 function courseportfolio_generate_result_report($type, $results) {
     $html = '';
-    if (!empty($type) && !empty($results) && is_array($results)) {
+    if (!empty($type)) {
         switch ($type) {
             case IMPORT_FOLDER:
                 return get_string('configuarationfileerror', 'local_courseportfolio');
@@ -975,7 +975,7 @@ function courseportfolio_generate_result_report($type, $results) {
                 $html = courseportfolio_generate_common_file_result($results);
         }
     }
-    return $html;
+    return courseportfolio_generate_back_button($html);
 }
 
 /**
@@ -985,7 +985,8 @@ function courseportfolio_generate_result_report($type, $results) {
  */
 function courseportfolio_generate_common_file_result($results) {
     global $OUTPUT;
-    $errorhtml = html_writer::tag('div', get_string('importerror', 'local_courseportfolio'), array('class' => 'alert alert-error'));
+    $errorhtml = '';
+    $successhtml = '';
     $sucessfiles = 0;
     $sucesscourses = 0;
     if (!empty($results) && is_array($results)) {
@@ -998,8 +999,11 @@ function courseportfolio_generate_common_file_result($results) {
                 $sucesscourses += count($result['success']['courses']);
             }
         }
+        $successhtml = courseportfolio_generate_common_file_success($sucessfiles, $sucesscourses);
+    } else {
+        $successhtml = get_string('nothingimported', 'local_courseportfolio');
     }
-    return courseportfolio_generate_back_button($errorhtml . courseportfolio_generate_common_file_success($sucessfiles, $sucesscourses));
+    return  $successhtml . $errorhtml;
 }
 
 /**
@@ -1013,7 +1017,7 @@ function courseportfolio_generate_common_file_error($topic, $courses) {
     $html = '';
     if (!empty($topic) && !empty($courses) && is_array($courses)) {
         foreach ($courses as $course) {
-            $html .= html_writer::tag('p', sprintf(get_string('importcommonfiletopicerror', 'local_courseportfolio'), $topic, $course));
+            $html .= html_writer::tag('p', sprintf(get_string('importcommonfiletopicerror', 'local_courseportfolio'), $course, $topic), array('style' => 'color:red;'));
         }
     }
     return $html;
@@ -1027,9 +1031,7 @@ function courseportfolio_generate_common_file_error($topic, $courses) {
  * @return string
  */
 function courseportfolio_generate_common_file_success($sucessfiles, $sucesscourses) {
-    $successhtml = html_writer::tag('div', get_string('importsuccess', 'local_courseportfolio'), array('class' => 'alert alert-block alert-info'));
-    $successhtml .= html_writer::tag('p', sprintf(get_string('importcommonfiletopicsuccess', 'local_courseportfolio'), $sucessfiles, $sucesscourses));
-    return $successhtml;
+    return html_writer::tag('p', sprintf(get_string('importcommonfiletopicsuccess', 'local_courseportfolio'), $sucessfiles, $sucesscourses));
 }
 
 /**
