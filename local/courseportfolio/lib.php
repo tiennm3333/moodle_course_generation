@@ -118,9 +118,10 @@ function courseportfolio_check_category($categoryname, $createnew = true) {
  *
  * @param string $categoryid
  * @param string $shortname
+ * @param int $topicnumber
  * @return object $course if exits or create new
  */
-function courseportfolio_check_course($categoryid, $shortname) {
+function courseportfolio_check_course($categoryid, $shortname, $topicnumber = '') {
     if (empty($shortname)) {
         return false;
     }
@@ -138,6 +139,7 @@ function courseportfolio_check_course($categoryid, $shortname) {
     // Apply course default settings
     $courseconfig = get_config('moodlecourse');
     $data->format = COURSE_FORMAT_TOPICS;
+    $data->numsections = !empty($topicnumber) ? $topicnumber : 10;
     $data->newsitems = isset($courseconfig->newsitems) ? $courseconfig->newsitems : 1;
     $data->showgrades = isset($courseconfig->showgrades) ? $courseconfig->showgrades : 1;
     $data->showreports = isset($courseconfig->showreports) ? $courseconfig->showreports : 0;
@@ -252,7 +254,7 @@ function courseportfolio_get_course_topic_by_name($categoryid, $coursename) {
  * get folderid into topic of course if exits
  *
  * @param string $foldername
- * @param int $courseid
+ * @param string $courseid
  * @return object | boolean
  */
 function courseportfolio_get_folder_id_by_name($foldername, $courseid) {
@@ -462,16 +464,16 @@ function courseportfolio_import_folder_files($fileconfig, $attachmentfiles) {
         // import fist line of file csv
         $firstline = courseportfolio_get_csv_fisrt_line($importreader);
         if (!empty($firstline[0]) && !empty($firstline[1]) && !empty($firstline[2]) && !empty($firstline[3]) && !empty($firstline[4])) {
-            if (courseportfolio_import_folfer_file(courseportfolio_normalize_input($firstline[0]), courseportfolio_normalize_input($firstline[1]), courseportfolio_normalize_input($firstline[2]),courseportfolio_normalize_input($firstline[3]), courseportfolio_normalize_input($firstline[4]), $attachmentfiles)) {
-                $totalfileimported++;
+            if ($countfileimported = courseportfolio_import_folfer_file(courseportfolio_normalize_input($firstline[0]), courseportfolio_normalize_input($firstline[1]), courseportfolio_normalize_input($firstline[2]),courseportfolio_normalize_input($firstline[3]), courseportfolio_normalize_input($firstline[4]), $attachmentfiles)) {
+                $totalfileimported = $totalfileimported + $countfileimported;
             }
         }
 
         // import from the second line to end of file csv
         while ($line = $importreader->next()) {
             if (!empty($line[0]) && !empty($line[1]) && !empty($line[2]) && !empty($line[3]) && !empty($line[4])) {
-                if (courseportfolio_import_folfer_file(courseportfolio_normalize_input($line[0]), courseportfolio_normalize_input($line[1]), courseportfolio_normalize_input($line[2]),courseportfolio_normalize_input($line[3]), courseportfolio_normalize_input($line[4]), $attachmentfiles)) {
-                    $totalfileimported++;
+                if ($countfileimported = courseportfolio_import_folfer_file(courseportfolio_normalize_input($line[0]), courseportfolio_normalize_input($line[1]), courseportfolio_normalize_input($line[2]),courseportfolio_normalize_input($line[3]), courseportfolio_normalize_input($line[4]), $attachmentfiles)) {
+                    $totalfileimported = $totalfileimported + $countfileimported;
                 }
             }
         }
@@ -583,7 +585,7 @@ function courseportfolio_genereate_import_result($topicnumber, $invalidcourses, 
  * @param string $foldername
  * @param string $filename
  * @param array $attachmentfiles
- * @return boolean
+ * @return int | boolean
  */
 function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnumber, $foldername, $filename, $attachmentfiles) {
     if (!$file = courseportfolio_get_file_instance_by_name($filename, $attachmentfiles)) {
@@ -602,11 +604,11 @@ function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnu
         return false;
     }
 
-    if (!$folderid = courseportfolio_get_folder_id_by_name($foldername, $course->id)) {
+    if (!courseportfolio_get_folder_id_by_name($foldername, $course->id)) {
         return false;
     }
 
-    return courseportfolio_create_file_activity_for_folders($folderid->id, $file);
+    return courseportfolio_create_file_activity_for_folders($foldername, $file);
 }
 
 /**
@@ -624,7 +626,7 @@ function courseportfolio_import_folfer($categoryname, $coursename, $topicnumber,
         return false;
     }
 
-    if (!$course = courseportfolio_check_course($categoryid, $coursename)) {
+    if (!$course = courseportfolio_check_course($categoryid, $coursename, $topicnumber)) {
         return false;
     }
 
@@ -668,15 +670,21 @@ function courseportfolio_create_file_activity_for_topics($topics, $attachmentfil
 /**
  * Create a file activities to folder
  *
- * @param array $folderid
+ * @param array $foldername
  * @param object $attachmentfile
  * @return boolean
  */
-function courseportfolio_create_file_activity_for_folders($folderid, $attachmentfile) {
-    if ($fileinstance = courseportfolio_get_course_modules_by_folder_name($folderid)) {
-        $fileinstance->coursemodule = $fileinstance->id;
-        if (courseportfolio_attach_file_to_activity($fileinstance, $attachmentfile, COURSE_MODULE_FOLDER)) {
-            return true;
+function courseportfolio_create_file_activity_for_folders($foldername, $attachmentfile) {
+    if ($coursemodules = courseportfolio_get_course_modules_by_folder_name($foldername)) {
+        $fileimported = 0;
+        if (is_array($coursemodules)) {
+            foreach ($coursemodules as $cm) {
+                $cm->coursemodule = $cm->id;
+                if (courseportfolio_attach_file_to_activity($cm, $attachmentfile, COURSE_MODULE_FOLDER)) {
+                    $fileimported++;
+                }
+            }
+            return $fileimported;
         }
     }
 
@@ -765,49 +773,24 @@ function courseportfolio_get_file_instance_by_name($filename, $attachmentfiles) 
 }
 
 /**
- * create course folder
- *
- * @param string $categoryname
- * @param string $coursename
- * @param int $topicnumber
- * @param string $foldername
- * @param string $folderdescription
- * @return object moduleinfo folder if create new folder
- *         int folderid if folder exits
- *         false if folder exits
- */
-function courseportfolio_create_folder($categoryname, $coursename, $topicnumber, $foldername, $folderdescription , $draftitemid = '') {
-    if ($category = courseportfolio_check_category($categoryname)) {
-        $course = courseportfolio_check_course($category, $coursename);
-        if (courseportfolio_check_topic_number($course, $topicnumber)) {
-            if ($folder = courseportfolio_check_folder($foldername, $folderdescription, $course, $topicnumber, $draftitemid)) {
-                return $folder;
-            }
-        }
-    }
-
-    return false;
-}
-
-/**
  * get contextid by draftitemid
  *
- * @param int $folderid
+ * @param string $foldername
  * @return object $coursemodule if exits | false
  */
-function courseportfolio_get_course_modules_by_folder_name($folderid) {
+function courseportfolio_get_course_modules_by_folder_name($foldername) {
     global $DB;
     $params = array(
-        'folderid' => $folderid,
+        'foldername' => $foldername,
         'modulename' => COURSE_MODULE_FOLDER
     );
     $sql = 'SELECT cm.*
             FROM {course_modules} cm
                    JOIN {modules} md ON md.id = cm.module
                    JOIN {folder} fd ON fd.id = cm.instance
-            WHERE fd.id = :folderid AND md.name = :modulename';
+            WHERE fd.name = :foldername AND md.name = :modulename';
 
-    return $DB->get_record_sql($sql, $params);
+    return $DB->get_records_sql($sql, $params);
 
 }
 
@@ -1035,7 +1018,7 @@ function courseportfolio_generate_folder_file_result($results) {
         $totalfiles = $results['totalfiles'];
     }
 
-    return courseportfolio_generate_back_button(courseportfolio_generate_folder_files_success($sucessfiles, $totalfiles));
+    return courseportfolio_generate_folder_files_success($sucessfiles, $totalfiles);
 }
 
 /**
@@ -1055,7 +1038,7 @@ function courseportfolio_generate_folder_result($results) {
         $totalfolders = $results['totalfolders'];
     }
 
-    return courseportfolio_generate_back_button(courseportfolio_generate_folder_success($sucessfolders, $totalfolders));
+    return courseportfolio_generate_folder_success($sucessfolders, $totalfolders);
 }
 
 /**
@@ -1094,8 +1077,7 @@ function courseportfolio_generate_common_file_success($sucessfiles, $sucesscours
  * @return string
  */
 function courseportfolio_generate_folder_files_success($sucessfiles, $totalfiles) {
-    $successhtml = html_writer::tag('div', get_string('importsuccess', 'local_courseportfolio'), array('class' => 'alert alert-block alert-info'));
-    $successhtml .= html_writer::tag('p', sprintf(get_string('importcommonfilefoldersuccess', 'local_courseportfolio'), $sucessfiles, $totalfiles));
+    $successhtml = html_writer::tag('p', sprintf(get_string('importcommonfilefoldersuccess', 'local_courseportfolio'), $sucessfiles, $totalfiles));
     return $successhtml;
 }
 
@@ -1107,8 +1089,7 @@ function courseportfolio_generate_folder_files_success($sucessfiles, $totalfiles
  * @return string
  */
 function courseportfolio_generate_folder_success($sucessfolders, $totalfolders) {
-    $successhtml = html_writer::tag('div', get_string('importsuccess', 'local_courseportfolio'), array('class' => 'alert alert-block alert-info'));
-    $successhtml .= html_writer::tag('p', sprintf(get_string('importfolderssuccess', 'local_courseportfolio'), $sucessfolders, $totalfolders));
+    $successhtml = html_writer::tag('p', sprintf(get_string('importfolderssuccess', 'local_courseportfolio'), $sucessfolders, $totalfolders));
     return $successhtml;
 }
 
