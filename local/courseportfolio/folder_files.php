@@ -39,7 +39,7 @@ if ($folderfilesdata = $folderfiles->get_data()) {
             list($totalfile, $totalfileimported) = courseportfolio_import_folder_files($configfile, $draftfiles);
 
             $a = new \stdClass();
-            $a->totalfile = $totalfile - 1;
+            $a->totalfile = $totalfile;
             $a->totalfileimported = $totalfileimported;
 
             echo '<div class="message">';

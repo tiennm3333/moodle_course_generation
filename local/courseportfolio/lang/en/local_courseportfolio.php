@@ -50,3 +50,4 @@ $string['importsuccess'] = 'Import success';
 $string['importcommonfiletopicerror'] = 'Course %s doesn\'t contain topic %s.';
 $string['importcommonfiletopicsuccess'] = '%s file (s) has been imported into %s course (s).';
 $string['reporttitle'] = 'Import results';
+$string['csvimportfoldersresult'] = 'import folders success with: {$a->totalfolderimported} / {$a->totalfolder} folders';

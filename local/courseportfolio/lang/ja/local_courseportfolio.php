@@ -50,3 +50,4 @@ $string['importsuccess'] = '輸入成功';
 $string['importcommonfiletopicerror'] = '%sコースに指定された%sトピックが存在しませんでした。';
 $string['importcommonfiletopicsuccess'] = '%s件のファイルが%s件のコースに登録されました。';
 $string['reporttitle'] = '登録結果';
+$string['csvimportfoldersresult'] = '指定された{$a->totalfolder}個のフォルダーのうち、{$a->totalfolderimported}個のフォルダーが登録されました';
