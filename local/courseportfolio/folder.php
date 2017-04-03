@@ -36,15 +36,9 @@ if ($foldersdata = $folders->get_data()) {
         try {
             $draftfilesvalue = array_values($draftfiles);
             $configfile = array_shift($draftfilesvalue);
-            list($totalfile, $totalfileimported) = courseportfolio_import_folders($configfile, $draftfiles);
 
-            $a = new stdClass();
-            $a->totalfolder = $totalfile;
-            $a->totalfolderimported = $totalfileimported;
-
-            echo '<div class="message">';
-            echo  get_string('csvimportfoldersresult', 'local_courseportfolio', $a);
-            echo '</div>';
+            $results = courseportfolio_import_folders($configfile, $draftfiles);
+            courseportfolio_import_result_report(IMPORT_FOLDER, $results);
 
         } catch (CsvFileOrderErrorException $e) {
             courseportfolio_import_error_report(IMPORT_FOLDER, $e);

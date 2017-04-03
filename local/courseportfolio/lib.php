@@ -52,7 +52,7 @@ function courseportfolio_check_topic_number($course, $topicnumber) {
     $courseformat = course_get_format($course->id);
     $formatoptions = $courseformat->get_format_options();
 
-    if (isset($formatoptions['numsections']) && $formatoptions['numsections'] != $topicnumber) {
+    if (isset($formatoptions['numsections']) && $formatoptions['numsections'] < $topicnumber) {
         $dataupdatecourseformat = (object)array('id' => $course->id, 'numsections' => $topicnumber);
         $changed =  $courseformat->update_course_format_options($dataupdatecourseformat);
     }
@@ -980,7 +980,7 @@ function courseportfolio_generate_result_report($type, $results) {
     if (!empty($type)) {
         switch ($type) {
             case IMPORT_FOLDER:
-                return get_string('configuarationfileerror', 'local_courseportfolio');
+                $html = courseportfolio_generate_folder_result($results);
             case IMPORT_FOLDER_FILE:
                 $html = courseportfolio_generate_folder_file_result($results);
             case IMPORT_TOPIC_FILE:
@@ -1039,6 +1039,26 @@ function courseportfolio_generate_folder_file_result($results) {
 }
 
 /**
+ * Generate import folder report
+ *
+ * @param array $results
+ * @return string html
+ */
+function courseportfolio_generate_folder_result($results) {
+    $sucessfolders = 0;
+    $totalfolders = 0;
+
+    if(!empty($results['sucessfolders']) && isset($results['sucessfolders'])) {
+        $sucessfolders = $results['sucessfolders'];
+    }
+    if(!empty($results['totalfolders']) && isset($results['totalfolders'])) {
+        $totalfolders = $results['totalfolders'];
+    }
+
+    return courseportfolio_generate_back_button(courseportfolio_generate_folder_success($sucessfolders, $totalfolders));
+}
+
+/**
  * Generate import common file error report
  * 
  * @param string $topic
@@ -1076,6 +1096,19 @@ function courseportfolio_generate_common_file_success($sucessfiles, $sucesscours
 function courseportfolio_generate_folder_files_success($sucessfiles, $totalfiles) {
     $successhtml = html_writer::tag('div', get_string('importsuccess', 'local_courseportfolio'), array('class' => 'alert alert-block alert-info'));
     $successhtml .= html_writer::tag('p', sprintf(get_string('importcommonfilefoldersuccess', 'local_courseportfolio'), $sucessfiles, $totalfiles));
+    return $successhtml;
+}
+
+/**
+ * Generate import folder success report
+ *
+ * @param int $sucessfiles
+ * @param int $totalfiles
+ * @return string
+ */
+function courseportfolio_generate_folder_success($sucessfolders, $totalfolders) {
+    $successhtml = html_writer::tag('div', get_string('importsuccess', 'local_courseportfolio'), array('class' => 'alert alert-block alert-info'));
+    $successhtml .= html_writer::tag('p', sprintf(get_string('importfolderssuccess', 'local_courseportfolio'), $sucessfolders, $totalfolders));
     return $successhtml;
 }
 
