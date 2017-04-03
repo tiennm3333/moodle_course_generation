@@ -26,11 +26,9 @@
 
 $string['courseportfolio'] = '授業支援インポート';
 $string['setting'] = '設定';
-
 $string['title/courses'] = 'Import Courses/Folders';
 $string['title/files'] = 'Import Files';
 $string['title/common_files'] = 'Import Files Common';
-
 $string['folders'] = '';
 $string['folders_help'] = '下記フォーマットのCSVファイルをアップロードしてください。<br>コースカテゴリ,コース名,トピックNo,フォルダ名,説明';
 $string['folderfiles'] = '';
@@ -38,12 +36,18 @@ $string['folderfiles_help'] = '以下の構成でファイルをアップロー�
 $string['topicfiles'] = '';
 $string['topicfiles_help'] = '以下の構成でファイルをアップロードしてください。<br>１．登録先情報のCSVファイル（ファイル名, file.csv）<br>２．登録するファイル（複数)<br><br>CSVファイルのフォーマット<br>コースカテゴリ, トピックNo. , ファイル名';
 $string['uploadbutton'] = 'Upload';
-
 $string['csvimportfoldersuccess'] = 'フォルダー登録ができました。';
 $string['csvimportfolderfalse'] = 'フォルダーは登録できません。';
 $string['csvcontenterror'] = 'CSVファイルは登録できません。';
 $string['csvfileformaterror'] = 'CSVファイルのフォーマットは正しくありません。';
 $string['csvfileordererror'] = 'CSVファイルの形式でアップロードしてください。';
-
 $string['csvimportfolderfilesresult'] = '指定された{$a->totalfile}個のファイルのうち、{$a->totalfileimported}個のファイルが登録されました';
+$string['configuarationfileerror'] = '%sファイルをアップロードしてください';
+$string['configuarationfilecontenterror'] = 'CSVファイルのフォーマットは正しくありません。';
+$string['importerror'] = 'インポートエラー';
+$string['importsuccess'] = '輸入成功';
+
+$string['importcommonfiletopicerror'] = '%sコースに指定された%sトピックが存在しませんでした。';
+$string['importcommonfiletopicsuccess'] = '%s件のファイルが%s件のコースに登録されました。';
+$string['reporttitle'] = '登録結果';
 $string['csvimportfoldersresult'] = '指定された{$a->totalfolder}個のフォルダーのうち、{$a->totalfolderimported}個のフォルダーが登録されました';

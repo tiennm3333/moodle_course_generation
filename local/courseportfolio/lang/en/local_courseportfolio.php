@@ -26,11 +26,9 @@
 
 $string['courseportfolio'] = 'Courses support import';
 $string['setting'] = 'Setting';
-
 $string['title/courses'] = 'Import Courses/Folders';
 $string['title/files'] = 'Import Files';
 $string['title/common_files'] = 'Import Files Common';
-
 $string['folders'] = '';
 $string['folders_help'] = 'Please upload a CSV file as below.<br>Course Category,Course name,Topic No,Folder name,Description';
 $string['folderfiles'] = '';
@@ -38,13 +36,18 @@ $string['folderfiles_help'] = 'Upload CSV files as below <br>1.CSV file register
 $string['topicfiles'] = '';
 $string['topicfiles_help'] = 'Upload CSV files as below <br>1.CSV file registered（file.csv）<br>2.registered Files<br><br>Format file.csv<br>Category,Topic No,File name';
 $string['uploadbutton'] = 'Upload';
-
 $string['csvimportfoldersuccess'] = 'import folder success';
 $string['csvimportfolderfalse'] = 'import folder false or folder exits';
 $string['csvcontenterror'] = 'csv content file error';
 $string['csvfileformaterror'] = 'csv file type not support encoding';
 $string['csvfileordererror'] = 'the first file import must have csv extension';
-
 $string['csvimportfolderfilesresult'] = 'import flies success with: {$a->totalfileimported} / {$a->totalfile} files';
-$string['csvimportfoldersresult'] = 'import folders success with: {$a->totalfolderimported} / {$a->totalfolder} folders';
+$string['configuarationfileerror'] = 'Please upload the configuaration file named %s';
+$string['configuarationfilecontenterror'] = 'Configuration file content is not valid';
+$string['importerror'] = 'Import error';
+$string['importsuccess'] = 'Import success';
 
+$string['importcommonfiletopicerror'] = 'Course %s doesn\'t contain topic %s.';
+$string['importcommonfiletopicsuccess'] = '%s file (s) has been imported into %s course (s).';
+$string['reporttitle'] = 'Import results';
+$string['csvimportfoldersresult'] = 'import folders success with: {$a->totalfolderimported} / {$a->totalfolder} folders';

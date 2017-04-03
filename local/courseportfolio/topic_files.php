@@ -34,16 +34,18 @@ if ($topicfilesdata = $topicfiles->get_data()) {
     $draftfiles = courseportfolio_get_draft_upload_files('topicfiles');
     if (!empty($draftfiles) && is_array($draftfiles)) {
         try {
-            $configfile = array_shift(array_values($draftfiles));
-            $results = courseportfolio_import_common_files($configfile, $draftfiles);
-        } catch (CsvFileOrderErrorException $e) {
-        
+            $results = courseportfolio_import_common_files(courseportfolio_get_import_config_file(IMPORT_COMMON_CONFIG_FILE, $draftfiles), $draftfiles);
+            courseportfolio_import_result_report(IMPORT_TOPIC_FILE, $results);
+        } catch (NotFoundConfigFileException $e) {
+            courseportfolio_import_error_report(IMPORT_TOPIC_FILE, $e);
         } catch (CsvFileFormatErrorException $e) {
-        
+            courseportfolio_import_error_report(IMPORT_TOPIC_FILE, $e);
         } catch (CsvContentErrorException $e) {
-        
+            courseportfolio_import_error_report(IMPORT_TOPIC_FILE, $e);
+        } catch (CsvFileOrderErrorException $e) {
+            courseportfolio_import_error_report(IMPORT_TOPIC_FILE, $e);
         } catch (Exception $e) {
-        
+            courseportfolio_import_error_report(IMPORT_TOPIC_FILE, $e);
         }
     }
 }

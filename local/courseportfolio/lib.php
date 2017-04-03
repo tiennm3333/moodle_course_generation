@@ -28,10 +28,17 @@ require_once($CFG->libdir . '/coursecatlib.php');
 require_once($CFG->libdir.'/filelib.php');
 require_once($CFG->dirroot . '/course/modlib.php');
 
+define('IMPORT_FOLDER_FILE', 'folderfile');
+define('IMPORT_FOLDER', 'folder');
+define('IMPORT_TOPIC_FILE', 'topicfile');
 define('COURSE_FORMAT_TOPICS', 'topics');
 define('COURSE_FORMAT_TOPIC_NUMBER', 'numsections');
 define('COURSE_MODULE_FOLDER', 'folder');
 define('COURSE_MODULE_RESOURCE', 'resource');
+define('IMPORT_COMMON_CONFIG_FILE', 'file.csv');
+define('IMPORT_FOLDER_CONFIG_FILE', 'import.csv');
+define('CONFIGURATION_FILE_ERROR', 'configurationfileerror');
+define('CONFIGURATION_FILE_CONTENT_ERROR', 'configurationfilecontenterror');
 
 /**
  * update topic number
@@ -45,7 +52,7 @@ function courseportfolio_check_topic_number($course, $topicnumber) {
     $courseformat = course_get_format($course->id);
     $formatoptions = $courseformat->get_format_options();
 
-    if (isset($formatoptions['numsections']) && $formatoptions['numsections'] < $topicnumber) {
+    if (isset($formatoptions['numsections']) && $formatoptions['numsections'] != $topicnumber) {
         $dataupdatecourseformat = (object)array('id' => $course->id, 'numsections' => $topicnumber);
         $changed =  $courseformat->update_course_format_options($dataupdatecourseformat);
     }
@@ -326,6 +333,24 @@ function courseportfolio_get_draft_upload_files($elemenname) {
 }
 
 /**
+ * Get import config file from draft files
+ *
+ * @param string $configfilename
+ * @param array $draftfiles
+ * @return object
+ */
+function courseportfolio_get_import_config_file($configfilename, $draftfiles) {
+    if (!empty($draftfiles) && is_array($draftfiles)) {
+        foreach ($draftfiles as $draftfile) {
+            if ($draftfile instanceof stored_file && $draftfile->get_filename() == $configfilename) {
+                return $draftfile;
+            }
+        }
+    }
+    throw new NotFoundConfigFileException();
+}
+
+/**
  * Get course module info by module name
  * 
  * @param string $modulename
@@ -367,7 +392,7 @@ function courseportfolio_get_file_encoding($csvdata) {
  * @return int $csvtotalline
  */
 function courseportfolio_get_csv_import_reader_instance($file, $type, &$csvtotalline = 0) {
-    if (courseportfolio_check_file_csv_extension($file)) {
+    if (empty($file) || courseportfolio_check_file_csv_extension($file)) {
         throw new CsvFileOrderErrorException();
     }
     if ($csvdata = $file->get_content()) {
@@ -402,7 +427,7 @@ function courseportfolio_import_common_files($fileconfig, $attachmentfiles) {
     if ($importreader = courseportfolio_get_csv_import_reader_instance($fileconfig, 'topicfiles')) {
         while ($line = $importreader->next()) {
             if (!empty($line[0]) && !empty($line[1]) && !empty($line[2])) {
-                if ($results = courseportfolio_import_common_file($line[0], $line[1], $line[2], $attachmentfiles)) {
+                if ($results = courseportfolio_import_common_file(courseportfolio_normalize_input($line[0]), courseportfolio_normalize_input($line[1]), courseportfolio_normalize_input($line[2]), $attachmentfiles)) {
                     $report[] = $results;
                 }
             }
@@ -509,12 +534,32 @@ function courseportfolio_import_common_file($categoryname, $topicnumber, $filena
     }
     
     $invalidcourses = array();
-    $importedcourse = array();
+    $importedcourses = array();
     $topics = courseportfolio_get_topics_by_courses($courses, $topicnumber, $invalidcourses);
     if (!empty($topics)) {
-        courseportfolio_create_file_activity_for_topics($topics, $file, $importedcourse);
+        courseportfolio_create_file_activity_for_topics($topics, $file, $importedcourses);
     }
-    return array('error' => array('topic' => $topicnumber ,'courses' => $invalidcourses), 'success' => array('filename' => $filename, 'courses' => $importedcourse));
+    return courseportfolio_genereate_import_result($topicnumber, $invalidcourses, $filename, $importedcourses);
+}
+
+/**
+ * Create import result
+ * 
+ * @param int $topicnumber
+ * @param array $invalidcourses
+ * @param string $filename
+ * @param array $importedcourses
+ * @return array
+ */
+function courseportfolio_genereate_import_result($topicnumber, $invalidcourses, $filename, $importedcourses) {
+    $results = array();
+    if (!empty($invalidcourses) && is_array($invalidcourses)) {
+        $results['error'] = array('topic' => $topicnumber ,'courses' => $invalidcourses);
+    }
+    if (!empty($importedcourses) && is_array($importedcourses)) {
+        $results['success'] = array('filename' => $filename ,'courses' => $importedcourses);
+    }
+    return $results;
 }
 
 /**
@@ -585,10 +630,10 @@ function courseportfolio_import_folfer($categoryname, $coursename, $topicnumber,
  * 
  * @param array $topics
  * @param object $attachmentfile
- * @param array $importedcourse
+ * @param array $importedcourses
  * @return boolean
  */
-function courseportfolio_create_file_activity_for_topics($topics, $attachmentfile, &$importedcourse) {
+function courseportfolio_create_file_activity_for_topics($topics, $attachmentfile, &$importedcourses) {
     if (!empty($topics) && is_array($topics)) {
         foreach ($topics as $topic) {
             if ($topic instanceof section_info && $attachmentfile instanceof stored_file) {
@@ -598,7 +643,7 @@ function courseportfolio_create_file_activity_for_topics($topics, $attachmentfil
                 }
                 if ($fileinstance = courseportfolio_create_file_activity($course, $topic, $attachmentfile->get_filename())) {
                     if (courseportfolio_attach_file_to_activity($fileinstance, $attachmentfile, COURSE_MODULE_RESOURCE)) {
-                        $importedcourse[] = $topic->course;
+                        $importedcourses[] = $topic->course;
                     }
                 }
             }
@@ -787,6 +832,220 @@ function courseportfolio_get_contextid_by_draftitemid($draftitemid) {
     return is_array($contextid) ? key($contextid) : false;
 }
 
+/**
+ * Process text input before imported
+ * 
+ * @param string $text
+ * @return string
+ */
+function courseportfolio_normalize_input($text) {
+    return trim($text);
+}
+
+/**
+ * Process with import error 
+ *
+ * @param string $type
+ * @param string $error
+ */
+function courseportfolio_import_error_report($type, $error) {
+    redirect(new moodle_url('/local/courseportfolio/report.php', courseportfolio_get_exception_params($type, $error)));
+}
+
+/**
+ * Get exception param for report
+ * 
+ * @param string $type
+ * @param object $error
+ * @return string
+ */
+function courseportfolio_get_exception_params($type, $error) {
+    $param = CONFIGURATION_FILE_ERROR;
+    if ($error instanceof NotFoundConfigFileException) {
+        $param = CONFIGURATION_FILE_ERROR;
+    }
+    if ($error instanceof CsvFileOrderErrorException) {
+        $param = CONFIGURATION_FILE_ERROR;
+    }
+    if ($error instanceof CsvFileFormatErrorException) {
+        $param = CONFIGURATION_FILE_ERROR;
+    }
+    if ($error instanceof CsvContentErrorException) {
+        $param = CONFIGURATION_FILE_CONTENT_ERROR;
+    }
+    return array('type' => $type, 'error' => $param);
+}
+
+/**
+ * Get exception message
+ *
+ * @param string $type
+ * @param string $error
+ * @return string
+ */
+function courseportfolio_get_exception_message($type, $error) {
+    if (!empty($error)) {
+        switch ($error) {
+            case CONFIGURATION_FILE_ERROR:
+                return sprintf(get_string('configuarationfileerror', 'local_courseportfolio'), courseportfolio_get_configuration_file_name($type));
+            case CONFIGURATION_FILE_CONTENT_ERROR:
+                return get_string('configuarationfilecontenterror', 'local_courseportfolio');
+        }
+    }
+    return '';
+}
+
+/**
+ * Get configuration file name by import type
+ * 
+ * @param string $type
+ * @return string
+ */
+function courseportfolio_get_configuration_file_name($type) {
+    if (!empty($type)) {
+        switch ($type) {
+            case IMPORT_FOLDER:
+                return IMPORT_FOLDER_CONFIG_FILE;
+            case IMPORT_FOLDER_FILE:
+                return IMPORT_FOLDER_CONFIG_FILE;
+            case IMPORT_TOPIC_FILE:
+                return IMPORT_COMMON_CONFIG_FILE;
+        }
+    }
+    return '';
+}
+
+/**
+ * Process with import results 
+ *
+ * @param string $type
+ * @param array $results
+ */
+function courseportfolio_import_result_report($type, $results) {
+    redirect(new moodle_url('/local/courseportfolio/report.php', array('type' => $type, 'results' => json_encode($results))));
+}
+
+/**
+ * Generate import report
+ * 
+ * @param array $error
+ * @param string $type
+ * @param array $results
+ * @return string
+ */
+function courseportfolio_generate_report($error, $type, $results) {
+    if (!empty($error)) {
+        return courseportfolio_generate_error_report($type, $error);
+    }
+    if (!empty($type) && !empty($results) && is_array($results)) {
+        return courseportfolio_generate_result_report($type, $results);
+    }
+    return '';
+}
+
+/**
+ * Generate error report
+ *
+ * @param string $type
+ * @param array $results
+ */
+function courseportfolio_generate_error_report($type, $error) {
+    $html = html_writer::tag('div', get_string('error'), array('class' => 'error'));
+    if (!empty($error)) {
+        $html = html_writer::tag('p', courseportfolio_get_exception_message($type, $error));
+    }
+    return courseportfolio_generate_back_button($html);
+}
+
+/**
+ * Generate result report
+ *
+ * @param string $type
+ * @param array $results
+ */
+function courseportfolio_generate_result_report($type, $results) {
+    $html = '';
+    if (!empty($type) && !empty($results) && is_array($results)) {
+        switch ($type) {
+            case IMPORT_FOLDER:
+                return get_string('configuarationfileerror', 'local_courseportfolio');
+            case IMPORT_FOLDER_FILE:
+                return get_string('configuarationfilecontenterror', 'local_courseportfolio');
+            case IMPORT_TOPIC_FILE:
+                $html = courseportfolio_generate_common_file_result($results);
+        }
+    }
+    return $html;
+}
+
+/**
+ * Generate import common file report
+ *
+ * @param array $results
+ */
+function courseportfolio_generate_common_file_result($results) {
+    global $OUTPUT;
+    $errorhtml = html_writer::tag('div', get_string('importerror', 'local_courseportfolio'), array('class' => 'alert alert-error'));
+    $sucessfiles = 0;
+    $sucesscourses = 0;
+    if (!empty($results) && is_array($results)) {
+        foreach ($results as $result) {
+            if(!empty($result['error']) && isset($result['error']['topic']) && isset($result['error']['courses']) && is_array($result['error']['courses'])) {
+                $errorhtml .= courseportfolio_generate_common_file_error($result['error']['topic'], $result['error']['courses']);
+            }
+            if(!empty($result['success']) && isset($result['success']['filename']) && isset($result['success']['courses']) && is_array($result['success']['courses'])) {
+                $sucessfiles++;
+                $sucesscourses += count($result['success']['courses']);
+            }
+        }
+    }
+    return courseportfolio_generate_back_button($errorhtml . courseportfolio_generate_common_file_success($sucessfiles, $sucesscourses));
+}
+
+/**
+ * Generate import common file error report
+ * 
+ * @param string $topic
+ * @param array $courses
+ * @return string
+ */
+function courseportfolio_generate_common_file_error($topic, $courses) {
+    $html = '';
+    if (!empty($topic) && !empty($courses) && is_array($courses)) {
+        foreach ($courses as $course) {
+            $html .= html_writer::tag('p', sprintf(get_string('importcommonfiletopicerror', 'local_courseportfolio'), $topic, $course));
+        }
+    }
+    return $html;
+}
+
+/**
+ * Generate import common file success report
+ *
+ * @param int $sucessfiles
+ * @param int $sucesscourses
+ * @return string
+ */
+function courseportfolio_generate_common_file_success($sucessfiles, $sucesscourses) {
+    $successhtml = html_writer::tag('div', get_string('importsuccess', 'local_courseportfolio'), array('class' => 'alert alert-block alert-info'));
+    $successhtml .= html_writer::tag('p', sprintf(get_string('importcommonfiletopicsuccess', 'local_courseportfolio'), $sucessfiles, $sucesscourses));
+    return $successhtml;
+}
+
+/**
+ * Generate back button
+ * 
+ * @param string $html
+ * @return string
+ */
+function courseportfolio_generate_back_button($html) {
+    $html .= html_writer::start_div('', array('style' => 'text-align:center'));
+    $html .= html_writer::tag('a', '(' . get_string('back') . ')', array('href' => (new moodle_url('/local/courseportfolio/courseportfolio.php'))->out(false)));
+    $html .= html_writer::end_div();
+    return $html;
+}
+
+class NotFoundConfigFileException extends Exception {}
 class CsvFileOrderErrorException extends ErrorException {}
 class CsvFileFormatErrorException extends ErrorException {}
 class CsvContentErrorException extends ErrorException {}
