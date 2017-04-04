@@ -35,6 +35,7 @@ define('COURSE_FORMAT_TOPICS', 'topics');
 define('COURSE_FORMAT_TOPIC_NUMBER', 'numsections');
 define('COURSE_MODULE_FOLDER', 'folder');
 define('COURSE_MODULE_RESOURCE', 'resource');
+define('FILE_AREA_TYPE', 'content');
 define('IMPORT_COMMON_CONFIG_FILE', 'file.csv');
 define('IMPORT_FOLDER_CONFIG_FILE', 'import.csv');
 define('CONFIGURATION_FILE_ERROR', 'configurationfileerror');
@@ -518,15 +519,6 @@ function courseportfolio_import_folders($fileconfig) {
 }
 
 /**
- * Generaet import common file report
- *
- * @param array $results
- */
-function courseportfolio_report_import_common_files($results) {
-    
-}
-
-/**
  * Import a common file to multi course by topic number
  * 
  * @param string $categoryname
@@ -609,7 +601,7 @@ function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnu
         return false;
     }
 
-    return courseportfolio_create_file_activity_for_folders($foldername, $file, $filenameimported);
+    return courseportfolio_create_file_activity_for_folders($foldername, $file, $filenameimported, $filename);
 }
 
 /**
@@ -674,15 +666,16 @@ function courseportfolio_create_file_activity_for_topics($topics, $attachmentfil
  * @param array $foldername
  * @param object $attachmentfile
  * @param array $filenameimported
+ * @param string $filename
  * @return boolean
  */
-function courseportfolio_create_file_activity_for_folders($foldername, $attachmentfile, &$filenameimported = array()) {
+function courseportfolio_create_file_activity_for_folders($foldername, $attachmentfile, &$filenameimported = array(), $filename) {
     if ($coursemodules = courseportfolio_get_course_modules_by_folder_name($foldername)) {
         $fileimported = 0;
         if (is_array($coursemodules)) {
             foreach ($coursemodules as $cm) {
                 $cm->coursemodule = $cm->id;
-                if (courseportfolio_attach_file_to_activity($cm, $attachmentfile, COURSE_MODULE_FOLDER)) {
+                if (courseportfolio_attach_file_to_activity($cm, $attachmentfile, COURSE_MODULE_FOLDER, $filename)) {
                     $fileimported++;
                     $filenameimported[$foldername] = $foldername;
                 }
@@ -746,13 +739,18 @@ function courseportfolio_create_file_activity($course, $topic, $activityname) {
  * @param string $modulename
  * @return mixed object | boolean
  */
-function courseportfolio_attach_file_to_activity($fileinstance, $attachmentfile, $modulename) {
+function courseportfolio_attach_file_to_activity($fileinstance, $attachmentfile, $modulename, $filename = '') {
     if ($fileinstance && ($attachmentfile instanceof stored_file)) {
         if (!$context = context_module::instance($fileinstance->coursemodule)) {
             return false;
         }
+
+        if ($modulename == COURSE_MODULE_FOLDER && courseportfolio_get_folder_file($context->id, $filename)) {
+            return false;
+        }
+
         $fs = get_file_storage();
-        return $fs->create_file_from_storedfile(array('contextid' => $context->id, 'component' => 'mod_' . $modulename, 'filearea' => 'content', 'itemid' => 0), $attachmentfile->get_id());
+        return $fs->create_file_from_storedfile(array('contextid' => $context->id, 'component' => 'mod_' . $modulename, 'filearea' => FILE_AREA_TYPE, 'itemid' => 0), $attachmentfile->get_id());
     }
     return false;
 }
@@ -794,7 +792,26 @@ function courseportfolio_get_course_modules_by_folder_name($foldername) {
             WHERE fd.name = :foldername AND md.name = :modulename';
 
     return $DB->get_records_sql($sql, $params);
+}
 
+/**
+ * get file in folder activity
+ *
+ * @param int $contextid
+ * @param string $filename
+ * @return object | false
+ */
+function courseportfolio_get_folder_file($contextid, $filename) {
+    global $DB;
+    $params = array(
+        'contextid' => $contextid,
+        'filename' => $filename,
+        'filearea' => FILE_AREA_TYPE,
+        'itemid' => 0,
+        'component' => 'mod_' . COURSE_MODULE_FOLDER,
+    );
+
+    return $DB->get_record('files', $params, '*');
 }
 
 /**
