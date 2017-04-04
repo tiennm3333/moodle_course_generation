@@ -602,7 +602,7 @@ function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnu
         return false;
     }
 
-    return courseportfolio_create_file_activity_for_folders($foldername, $file, $totalfolderimported, $filename);
+    return courseportfolio_create_file_activity_for_folders($foldername, $file, $totalfolderimported, $filename, $course->id, $topicnumber);
 }
 
 /**
@@ -668,21 +668,29 @@ function courseportfolio_create_file_activity_for_topics($topics, $attachmentfil
  * @param object $attachmentfile
  * @param array $totalfolderimported
  * @param string $filename
+ * @param int $courseid
+ * @param int $topicnumber
  * @return boolean
  */
-function courseportfolio_create_file_activity_for_folders($foldername, $attachmentfile, &$totalfolderimported = array(), $filename) {
-    if ($coursemodules = courseportfolio_get_course_modules_by_folder_name($foldername)) {
-        $fileimported = 0;
+function courseportfolio_create_file_activity_for_folders($foldername, $attachmentfile, &$totalfolderimported = array(), $filename, $courseid, $topicnumber) {
+    if ($coursemodules = courseportfolio_get_course_modules_by_folder_name($foldername, $courseid, $topicnumber)) {
+        $flag = false;
         if (is_array($coursemodules)) {
             foreach ($coursemodules as $cm) {
                 $cm->coursemodule = $cm->id;
                 if (courseportfolio_attach_file_to_activity($cm, $attachmentfile, COURSE_MODULE_FOLDER, $filename)) {
-                    $fileimported++;
                     $totalfolderimported[$foldername] = $foldername;
+                    $flag = true;
                 }
             }
 
-            return $fileimported;
+            if (count($coursemodules) > 1 && $flag) {
+                for($i = 1; $i < count($coursemodules); $i++) {
+                    $totalfolderimported[$foldername . $i] = $foldername;
+                }
+            }
+
+            return true;
         }
     }
 
@@ -779,19 +787,24 @@ function courseportfolio_get_file_instance_by_name($filename, $attachmentfiles) 
  * get contextid by draftitemid
  *
  * @param string $foldername
+ * @param int $courseid
+ * @param int $topicnumber
  * @return object $coursemodule if exits | false
  */
-function courseportfolio_get_course_modules_by_folder_name($foldername) {
+function courseportfolio_get_course_modules_by_folder_name($foldername, $courseid, $topicnumber) {
     global $DB;
     $params = array(
         'foldername' => $foldername,
-        'modulename' => COURSE_MODULE_FOLDER
+        'modulename' => COURSE_MODULE_FOLDER,
+        'courseid' => $courseid,
+        'topicnumber' => $topicnumber,
     );
     $sql = 'SELECT cm.*
             FROM {course_modules} cm
                    JOIN {modules} md ON md.id = cm.module
                    JOIN {folder} fd ON fd.id = cm.instance
-            WHERE fd.name = :foldername AND md.name = :modulename';
+                   JOIN {course_sections} cs ON cs.id = cm.section
+            WHERE fd.name = :foldername AND md.name = :modulename AND cm.course = :courseid AND cs.section = :topicnumber';
 
     return $DB->get_records_sql($sql, $params);
 }
