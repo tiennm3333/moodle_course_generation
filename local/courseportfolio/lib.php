@@ -260,7 +260,7 @@ function courseportfolio_get_course_topic_by_name($categoryid, $coursename) {
  */
 function courseportfolio_get_folder_id_by_name($foldername, $courseid) {
     global $DB;
-    return $DB->get_record('folder', array('name' => $foldername, 'course' => $courseid), 'id');
+    return $DB->get_records('folder', array('name' => $foldername, 'course' => $courseid), 'id');
 }
 
 /**
@@ -460,22 +460,22 @@ function courseportfolio_import_common_files($fileconfig, $attachmentfiles) {
  */
 function courseportfolio_import_folder_files($fileconfig, $attachmentfiles) {
     if ($importreader = courseportfolio_get_csv_import_reader_instance($fileconfig, 'folderfiles', $totalfile)) {
-        $totalfileimported = 0;
-        $filenameimported = array();
+        $totalfolderimported = array();
+        $countfileimported = array();
 
         // import fist line of file csv
         $firstline = courseportfolio_get_csv_fisrt_line($importreader);
         if (!empty($firstline[0]) && !empty($firstline[1]) && !empty($firstline[2]) && !empty($firstline[3]) && !empty($firstline[4])) {
-            if ($countfileimported = courseportfolio_import_folfer_file(courseportfolio_normalize_input($firstline[0]), courseportfolio_normalize_input($firstline[1]), courseportfolio_normalize_input($firstline[2]),courseportfolio_normalize_input($firstline[3]), courseportfolio_normalize_input($firstline[4]), $attachmentfiles, $filenameimported)) {
-                $totalfileimported = $totalfileimported + $countfileimported;
+            if (courseportfolio_import_folfer_file(courseportfolio_normalize_input($firstline[0]), courseportfolio_normalize_input($firstline[1]), courseportfolio_normalize_input($firstline[2]),courseportfolio_normalize_input($firstline[3]), courseportfolio_normalize_input($firstline[4]), $attachmentfiles, $totalfolderimported)) {
+                array_push($countfileimported, $firstline[4]);
             }
         }
 
         // import from the second line to end of file csv
         while ($line = $importreader->next()) {
             if (!empty($line[0]) && !empty($line[1]) && !empty($line[2]) && !empty($line[3]) && !empty($line[4])) {
-                if ($countfileimported = courseportfolio_import_folfer_file(courseportfolio_normalize_input($line[0]), courseportfolio_normalize_input($line[1]), courseportfolio_normalize_input($line[2]),courseportfolio_normalize_input($line[3]), courseportfolio_normalize_input($line[4]), $attachmentfiles, $filenameimported)) {
-                    $totalfileimported = $totalfileimported + $countfileimported;
+                if (courseportfolio_import_folfer_file(courseportfolio_normalize_input($line[0]), courseportfolio_normalize_input($line[1]), courseportfolio_normalize_input($line[2]),courseportfolio_normalize_input($line[3]), courseportfolio_normalize_input($line[4]), $attachmentfiles, $totalfolderimported)) {
+                    array_push($countfileimported, $line[4]);
                 }
             }
         }
@@ -483,7 +483,7 @@ function courseportfolio_import_folder_files($fileconfig, $attachmentfiles) {
         $importreader->cleanup(true);
     }
 
-    return array('totalfiles' => count($filenameimported), 'sucessfiles' => $totalfileimported);
+    return array('totalfiles' => count($totalfolderimported), 'sucessfiles' => count($countfileimported));
 }
 
 /**
@@ -578,9 +578,10 @@ function courseportfolio_genereate_import_result($topicnumber, $invalidcourses, 
  * @param string $foldername
  * @param string $filename
  * @param array $attachmentfiles
+ * @param array $totalfolderimported
  * @return int | boolean
  */
-function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnumber, $foldername, $filename, $attachmentfiles, &$filenameimported = array()) {
+function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnumber, $foldername, $filename, $attachmentfiles, &$totalfolderimported = array()) {
     if (!$file = courseportfolio_get_file_instance_by_name($filename, $attachmentfiles)) {
         return false;
     }
@@ -601,7 +602,7 @@ function courseportfolio_import_folfer_file($categoryname, $coursename, $topicnu
         return false;
     }
 
-    return courseportfolio_create_file_activity_for_folders($foldername, $file, $filenameimported, $filename);
+    return courseportfolio_create_file_activity_for_folders($foldername, $file, $totalfolderimported, $filename);
 }
 
 /**
@@ -665,11 +666,11 @@ function courseportfolio_create_file_activity_for_topics($topics, $attachmentfil
  *
  * @param array $foldername
  * @param object $attachmentfile
- * @param array $filenameimported
+ * @param array $totalfolderimported
  * @param string $filename
  * @return boolean
  */
-function courseportfolio_create_file_activity_for_folders($foldername, $attachmentfile, &$filenameimported = array(), $filename) {
+function courseportfolio_create_file_activity_for_folders($foldername, $attachmentfile, &$totalfolderimported = array(), $filename) {
     if ($coursemodules = courseportfolio_get_course_modules_by_folder_name($foldername)) {
         $fileimported = 0;
         if (is_array($coursemodules)) {
@@ -677,9 +678,10 @@ function courseportfolio_create_file_activity_for_folders($foldername, $attachme
                 $cm->coursemodule = $cm->id;
                 if (courseportfolio_attach_file_to_activity($cm, $attachmentfile, COURSE_MODULE_FOLDER, $filename)) {
                     $fileimported++;
-                    $filenameimported[$foldername] = $foldername;
+                    $totalfolderimported[$foldername] = $foldername;
                 }
             }
+
             return $fileimported;
         }
     }
