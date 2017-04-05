@@ -49,5 +49,4 @@ $string['importcommonfiletopicsuccess'] = '%s file (s) has been imported into %s
 $string['importcommonfilefoldersuccess'] = '%s file (s) has been imported into %s folder (s).';
 $string['importfolderssuccess'] = '%s folder (s) has been imported into %s topic (s).';
 $string['reporttitle'] = 'Import results';
-$string['csvimportfoldersresult'] = 'import folders success with: {$a->totalfolderimported} / {$a->totalfolder} folders';
 $string['nothingimported'] = 'No file has been imported.';
